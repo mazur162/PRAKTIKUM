@@ -6,16 +6,22 @@
 # Как обычно. Ваш Алексей Сальников.
 #
 
-**/*~
-**/*.o
-**/*.a
-**/*.so
-**/*.so.*
-**/*.swp
-**/*.swo
-**/.#*
-**/*.tmp
-**/a.out
-**/.DS_Store
-**/thumbs.db
+*~
+*.o
+*.a
+*.so
+*.so.*
+*.swp
+*.swo
+.#*
+*.tmp
+a.out
+.DS_Store
+thumbs.db
+
+*.exe
+*.obj
+*.dll
+*.lib
+*.ppu
 
