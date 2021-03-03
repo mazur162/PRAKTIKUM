@@ -14,9 +14,9 @@ Const
     dx = 1;
     dy = 1;
     // Цвета в 16 битной палитре:
-    pink = 63506;
-    blue = 991;
-    green = 1643;
+    f1_color = 63506;     //pink
+    f2_color = 991;        //blue
+    f3_color = 1643;      //green
     background_color = 63418;
     grey = 33808;
     dark_grey = 10597;
@@ -30,7 +30,7 @@ var
     epsilon_root, epsilon_integral, k, I1, I2, I3, x1, x2, x3, Square: double;
     eps_root_format, eps_integral_format: integer;
 
-function F1(x: real; proizvodnaya: integer): real; // pink
+function F1(x: real; proizvodnaya: integer): real; 
 begin
     if proizvodnaya = 0 then
         F1 := power(2,x)+1
@@ -40,7 +40,7 @@ begin
         F1 := ln(2)*ln(2)*power(2,x);
 end;
 
-function F2(x: real; proizvodnaya: integer): real; // blue
+function F2(x: real; proizvodnaya: integer): real; 
 begin
     if proizvodnaya = 0 then
         F2 := power(x,5)
@@ -50,7 +50,7 @@ begin
         F2 := 20*power(x,3);
 end;
 
-function F3(x: real; proizvodnaya : integer): real; // green
+function F3(x: real; proizvodnaya : integer): real;
 begin
     if proizvodnaya = 0 then
         F3 := (1-x)/3
@@ -212,7 +212,7 @@ end;
 procedure Graphic;
 var
         x0, y0, x, y, xLeft, yDown, xRight, yUp, n, i: integer;
-        s: string;
+        s, m1, m2: string;
         x1, y1, mx, my, num, eps: double;
         Driver: SmallInt; // Номер драйвера
         Mode : SmallInt; // Номер графического режима
@@ -285,7 +285,6 @@ begin
         end;
     SetFillStyle(SolidFill, fill_color);
     FloodFill(x0,y0-round(my), fill_color);
-///////////////////////////////////////////////////////////////////////////////
 
     // Рисуем оси координат: 
     SetColor(grey);
@@ -307,14 +306,14 @@ begin
            OutTextXY(x - TextWidth(s) div 2, y0 + 10, s)
         end;
     // Засечки на оси OY: 
-    n := round((fmax - fmin) / dy) + 1; { количество засечек по ОY }
+    n := round((fmax - fmin) / dy) + 1; // количество засечек по ОY 
     for i := 1 to n do
         begin
-            num := fMin + (i - 1) * dy; { Координата на оси ОY }
+            num := fMin + (i - 1) * dy; // Координата на оси ОY 
             y := yUp - trunc(my * (num - fmin));
-            Line(x0 - 3, y, x0 + 3, y); { рисуем засечки на оси Oy }
+            Line(x0 - 3, y, x0 + 3, y); // рисуем засечки на оси Oy 
             str(num:0:0, s);
-            if abs(num) > 1E-15 then { Исключаем 0 на оси OY }
+            if abs(num) > 1E-15 then // Исключаем 0 на оси OY 
                 OutTextXY(x0 + 7, y - TextHeight(s) div 2, s)
         end;
 
@@ -326,7 +325,7 @@ begin
             y := y0 - round(y1 * my); // Координата Y в графическом окне 
             // Если y попадает в границы [yDown; yUp], то ставим точку: 
             if (y >= yDown) and (y <= yUp) then 
-                PutPixel(x, y, pink);
+                PutPixel(x, y, f1_color);
             x1 := x1 + eps // Увеличиваем абсциссу 
         end;
 
@@ -338,10 +337,10 @@ begin
             y := y0 - round(y1 * my);  // Координата Y в графическом окне 
             // Если y попадает в границы [yDown; yUp], то ставим точку: 
             if (y >= yDown) and (y <= yUp) then 
-                if (GetPixel(x,y) = pink) then
+                if (GetPixel(x,y) = f1_color) then
                     PutPixel(x,y,dark_grey)
                 else
-                    PutPixel(x,y,blue);
+                    PutPixel(x,y,f2_color);
             x1 := x1 + eps  // Увеличиваем абсциссу 
         end;
 
@@ -353,10 +352,10 @@ begin
             y := y0 - round(y1 * my);  // Координата Y в графическом окне 
             // Если y попадает в границы [yDown; yUp], то ставим точку: 
             if (y >= yDown) and (y <= yUp) then 
-                if (GetPixel(x,y) = pink) or (GetPixel(x,y) = blue) then
+                if (GetPixel(x,y) = f1_color) or (GetPixel(x,y) = f2_color) then
                     PutPixel(x,y,dark_grey)
                 else
-                    PutPixel(x,y,green);
+                    PutPixel(x,y,f3_color);
             x1 := x1 + eps;  // Увеличиваем абсциссу 
         end;
 
@@ -364,7 +363,9 @@ begin
     SetColor(dark_grey);
     x := x0 + round(Root(@F1,@F2,a,b,epsilon_root) * mx);
     y := y0 - round(F1(Root(@F1,@F2,a,b,epsilon_root),0) * my);
-OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F2,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format))+','+FloatToStr((round(F1(Root(@F1,@F2,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)))+')');
+    m1 := FloatToStr((round(Root(@F1,@F2,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format));
+    m2 := FloatToStr((round(F1(Root(@F1,@F2,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)));
+    OutTextXY(x, y-14,'('+m1+','+m2+')');
     Setcolor(grey);
     SetLineStyle(DashedLn,0,NormWidth);
     Line(x,y,x,y0);
@@ -372,7 +373,9 @@ OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F2,a,b,epsilon_root)*power(10,
     SetColor(dark_grey);
     x := x0 + round(Root(@F2,@F3,a,b,epsilon_root) * mx);
     y := y0 - round(F2(Root(@F2,@F3,a,b,epsilon_root),0) * my);
-OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F2,@F3,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format))+','+FloatToStr((round(F2(Root(@F2,@F3,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)))+')');
+    m1 := FloatToStr((round(Root(@F2,@F3,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format));
+    m2 := FloatToStr((round(F2(Root(@F2,@F3,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)));
+    OutTextXY(x, y-14,'('+m1+','+m2+')');
     Setcolor(grey);
     SetLineStyle(DashedLn,0,NormWidth);
     Line(x,y,x,y0);
@@ -380,19 +383,21 @@ OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F2,@F3,a,b,epsilon_root)*power(10,
     SetColor(dark_grey);
     x := x0 + round(Root(@F1,@F3,a,b,epsilon_root) * mx);
     y := y0 - round(F1(Root(@F1,@F3,a,b,epsilon_root),0) * my);
-OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F3,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format))+','+FloatToStr((round(F1(Root(@F1,@F3,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)))+')');
+    m1 := FloatToStr((round(Root(@F1,@F3,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format));
+    m2 := FloatToStr((round(F1(Root(@F1,@F3,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)));
+    OutTextXY(x, y-14,'('+m1+','+m2+')');
     Setcolor(grey);
     SetLineStyle(DashedLn,0,NormWidth);
     Line(x,y,x,y0);
 
 
-    SetColor(pink);
+    SetColor(f1_color);
     OutTextXY(50, 50, 'y = 2^x + 1');
 
-    SetColor(blue);
+    SetColor(f2_color);
     OutTextXY(50, 70, 'y = x^5');
 
-    SetColor(green);
+    SetColor(f3_color);
     OutTextXY(50, 90, 'y = (1-x)/3');
 
     SetColor(fill_color);
@@ -422,7 +427,8 @@ begin
         flag := 0;
         write('epsilon_integral = ');
         readln(epsilon_integral);
-        if (IOResult <> 0) or (epsilon_integral <= 0) or (epsilon_integral >= 1) then
+        if (IOResult <> 0) or (epsilon_integral <= 0) or 
+           (epsilon_integral >= 1) then
             Error();
     until flag = 0;
     
@@ -441,7 +447,8 @@ begin
         flag := 0;
         write('epsilon_root = ');
         readln(epsilon_root);
-        if (IOResult <> 0) or (epsilon_root <= 0) or (epsilon_root >= 1) then
+        if (IOResult <> 0) or (epsilon_root <= 0) or 
+           (epsilon_root >= 1) then
             Error();
     until flag = 0;
     
@@ -469,7 +476,8 @@ begin
         flag := 0;
         write('do_debug_root = ');
         readln(do_debug_root);
-        if (IOResult <> 0) or ((do_debug_root <> 0) and (do_debug_root <> 1)) then
+        if (IOResult <> 0) or ((do_debug_root <> 0) and 
+           (do_debug_root <> 1)) then
             Error();
     until flag = 0;
 
@@ -479,7 +487,8 @@ begin
         flag := 0;
         write('do_debug_integral = ');
         readln(do_debug_integral);
-        if (IOResult <> 0) or ((do_debug_integral <> 0) and (do_debug_integral <> 1)) then
+        if (IOResult <> 0) or ((do_debug_integral <> 0) and 
+           (do_debug_integral <> 1)) then
             Error();
     until flag = 0;
 
@@ -489,7 +498,8 @@ begin
         flag := 0;
         write('do_draw = ');
         readln(do_draw);
-        if (IOResult <> 0) or ((do_draw <> 0) and (do_draw <> 1)) then
+        if (IOResult <> 0) or 
+           ((do_draw <> 0) and (do_draw <> 1)) then
             Error();
     until flag = 0;
 
