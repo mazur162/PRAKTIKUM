@@ -1,4 +1,4 @@
-program task_2;
+﻿program task_2;
 {$I-}
 uses
     PtcGraph,
@@ -398,7 +398,8 @@ OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F3,a,b,epsilon_root)*power(10,
     SetColor(fill_color);
     OutTextXY(50, 110, 'S = '+FloatToStr((round(Square*power(10,eps_integral_format)))/power(10,eps_integral_format)));
     
-        Delay(7000);
+        //Delay(10000);
+    Readln;
     CloseGraph;
 end;
 
@@ -514,7 +515,7 @@ begin
 
     if do_debug_root = 1 then
         begin
-                Delay(3000);
+                Delay(2000);
             writeln('________________________________________________________________________');
             writeln('ROOTS DEBUG:') ;
             writeln;
@@ -525,7 +526,7 @@ begin
             Crt.TextColor(Black);
             writeln;
 
-            Delay(2000);
+            Delay(1000);
             writeln('F1 x F3: ');
             RootDebug(@F1,@F3,a,b,epsilon_root);
             Crt.TextColor(2);
@@ -533,7 +534,7 @@ begin
             Crt.TextColor(Black);
             writeln;
 
-            Delay(2000);
+            Delay(1000);
             writeln('F2 x F3: ');
             RootDebug(@F2,@F3,a,b,epsilon_root);
             Crt.TextColor(2);
@@ -543,7 +544,7 @@ begin
 
     if do_debug_integral = 1 then
         begin
-            Delay(3000);
+            Delay(2000);
             writeln('________________________________________________________________________');
             writeln('INTEGRAL DEBUG:');
             writeln;
@@ -566,7 +567,7 @@ begin
 
     if do_draw = 1 then
         begin
-            Delay(3000);
+            Delay(2000);
             writeln('________________________________________________________________________');
             writeln('GRAPHIC:');
             writeln;
