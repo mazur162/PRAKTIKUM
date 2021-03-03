@@ -2,7 +2,7 @@ program task_2;
 {$I-}
 uses
     PtcGraph,
-    Math, Crt, SysUtils; // Подключаем модули
+    Math, Crt, SysUtils;
 
 Const
     // Границы рассматриваемого отрезка:
@@ -364,7 +364,7 @@ begin
     SetColor(dark_grey);
     x := x0 + round(Root(@F1,@F2,a,b,epsilon_root) * mx);
     y := y0 - round(F1(Root(@F1,@F2,a,b,epsilon_root),0) * my);
-OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F2,a,b,epsilon_root)*1000))/ 1000)+','+FloatToStr((round(F1(Root(@F1,@F2,a,b,epsilon_root),0)*1000)/1000))+')');
+OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F2,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format))+','+FloatToStr((round(F1(Root(@F1,@F2,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)))+')');
     Setcolor(grey);
     SetLineStyle(DashedLn,0,NormWidth);
     Line(x,y,x,y0);
@@ -372,7 +372,7 @@ OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F2,a,b,epsilon_root)*1000))/ 1
     SetColor(dark_grey);
     x := x0 + round(Root(@F2,@F3,a,b,epsilon_root) * mx);
     y := y0 - round(F2(Root(@F2,@F3,a,b,epsilon_root),0) * my);
-OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F2,@F3,a,b,epsilon_root)*1000))/ 1000)+','+FloatToStr((round(F2(Root(@F2,@F3,a,b,epsilon_root),0)*1000)/1000))+')');
+OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F2,@F3,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format))+','+FloatToStr((round(F2(Root(@F2,@F3,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)))+')');
     Setcolor(grey);
     SetLineStyle(DashedLn,0,NormWidth);
     Line(x,y,x,y0);
@@ -380,7 +380,7 @@ OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F2,@F3,a,b,epsilon_root)*1000))/ 1
     SetColor(dark_grey);
     x := x0 + round(Root(@F1,@F3,a,b,epsilon_root) * mx);
     y := y0 - round(F1(Root(@F1,@F3,a,b,epsilon_root),0) * my);
-OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F3,a,b,epsilon_root)*1000))/ 1000)+','+FloatToStr((round(F1(Root(@F1,@F3,a,b,epsilon_root),0)*1000)/1000))+')');
+OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F3,a,b,epsilon_root)*power(10,eps_root_format)))/ power(10,eps_root_format))+','+FloatToStr((round(F1(Root(@F1,@F3,a,b,epsilon_root),0)*power(10,eps_root_format))/power(10,eps_root_format)))+')');
     Setcolor(grey);
     SetLineStyle(DashedLn,0,NormWidth);
     Line(x,y,x,y0);
@@ -396,11 +396,8 @@ OutTextXY(x, y-14,'('+FloatTostr((round(Root(@F1,@F3,a,b,epsilon_root)*1000))/ 1
     OutTextXY(50, 90, 'y = (1-x)/3');
 
     SetColor(fill_color);
-    OutTextXY(50, 110, 'S = '+FloatToStr(round(Square*1000)/1000));
+    OutTextXY(50, 110, 'S = '+FloatToStr((round(Square*power(10,eps_integral_format)))/power(10,eps_integral_format)));
     
-    if Keypressed then
-        CloseGraph
-    else
         Delay(7000);
     CloseGraph;
 end;
