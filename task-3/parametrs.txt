@@ -1,8 +1,8 @@
  population_volume = 30
  quality_epsilon = 0.00001
- max_iters = 100
- max_valueless_iters = 100
- enough_function_value = 2
- preserved_high_positions = 2
- preserved_low_positions = 2
+ max_iters = 10
+ max_valueless_iters = 10
+ enough_function_value = 4
+ preserved_high_positions = 4
+ preserved_low_positions = 4
  variability = 0.5

@@ -4,8 +4,6 @@ uses
     Math, Crt, SysUtils;
 
 const
-    Black = 15;
-    White = 0;
     population_volume = 30; // Размер начальной популяции
     a = 0; // Левая граница рассматриваемоего отрезка
     b = 4; // Правая граница рассматриваемого отрезка
@@ -13,7 +11,7 @@ const
 
 type
     bit = 0..1;
-    genom = array[0..M - 1] of bit; // Геном одной особи
+    genom = array[1..M] of bit; // Геном одной особи
     individ = record // Особь
     gen: genom;
     funct: real;
@@ -24,7 +22,7 @@ popul = array[1..population_volume] of individ; // Популяция
 
 var
 
-    pop: popul; 
+    pop: popul; // Основная популяция 
     i, k, j, valueless_iters, iters: integer;
     x: real;
 
@@ -129,7 +127,7 @@ var
 begin
     for i := 1 to population_volume do
     begin
-        for j := 0 to (M - 1) do
+        for j := 1 to M do
             p[i].gen[j] := random(2) mod 2;
         p[i].alive := true;
         p[i].funct := F (Convert_OX(p[i].gen));
@@ -165,7 +163,7 @@ var
 begin
     for i := 1 to population_volume do
         for j := 1 to population_volume do
-            if Equal(pop,i,j) and (pop[i].alive) and (pop[j].alive) and (i<>j) then
+            if Equal(pop,i,j) and (pop[i].alive) and (pop[j].alive) and (i<>j) and (j <> populaion_volume) then
             begin
                 for k := 1 to (M - 1) do
                     pop[j].gen[k] := random(2) mod 2;
@@ -220,7 +218,7 @@ var
     p1, p2: integer;
 begin
     dead_number := 0;
-    for i := 0 to population_volume - 1 do
+    for i := 1 to population_volume do
         if not pop[i].alive then
             dead_number := dead_number + 1;
 
@@ -269,7 +267,7 @@ var
 begin
 
     dead_number := 0;
-    for i := 0 to population_volume - 1 do
+    for i := 1 to population_volume do
         if not pop[i].alive then
             dead_number := dead_number + 1;
         repeat
@@ -436,7 +434,7 @@ procedure OneBit_Mut (var pop: popul);
 var
     k: integer;
 begin
-    for k := 1 to trunc(variability*population_volume) do
+    for k := 1 to trunc(variability*population_volume)+1 do
     begin
         i := random(M - 1) + 1;
         j := random (population_volume - 2) + 2;
@@ -453,7 +451,7 @@ var
     i, j, k, num: integer;
     t: bit;
 begin
-    for k := 1 to trunc(variability*population_volume) do
+    for k := 1 to trunc(variability*population_volume)+1 do
     begin
         num := random(population_volume-2) + 2;
         i := random(M - 1) + 1;
@@ -482,7 +480,7 @@ var
     i, k, num, s: integer;
     t: bit;
 begin
-    for k := 1 to trunc(variability*population_volume) do
+    for k := 1 to trunc(variability*population_volume)+1 do
     begin
         s := random (M -1) + 1;
         num := random(population_volume-2) + 2;
@@ -512,7 +510,7 @@ begin
             if pop[j].alive then
             begin
                 write(log,' ', round(j):5, '           ');
-                for k := 0 to (M - 1) do
+                for k := 1 to M do
                     write(log, pop[j].gen[k]);
                 write(log, '     ');
                 x := Convert_OX (pop[j].gen);
@@ -539,7 +537,7 @@ begin
             else
                 Crt.TextColor(Black);
             write(' ', round(j):5, '           ');
-            for k := 0 to (M - 1) do
+            for k := 1 to M do
                 write(pop[j].gen[k]);
             write('     ');
             x := Convert_OX(pop[j].gen);
@@ -716,7 +714,7 @@ begin
                                     if (IOResult <> 0) or (variability <= 0) or (variability >= 1) then
                                         Error();
                                     until error_flag = 0;
-                                    writeln(' Okey! ', trunc(variability*population_volume),'/',population_volume,' individs would mutate');
+                                    writeln(' Okey! ', trunc(variability*population_volume)+1,'/',population_volume,' individs would mutate');
 
                                     assign(parametrs, 'parametrs.txt');
                                     rewrite(parametrs);
@@ -866,3 +864,7 @@ begin
 
                                                 close(log);
 end.
+
+// NOTES:
+// Сделать чтение парамтров и скрещиваний/мутаций/отборов из файла
+// Разобраться с удаленным preserved_low последним 
