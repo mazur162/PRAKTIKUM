@@ -22,22 +22,21 @@ begin
     reset(a);
     count := 0;
         repeat
-            while (not eoln(a)) do
-                read(a, c);
-            readln(a);
-            count := count + 1;
-        until count = num - 1;
-
-    repeat
-        read(a,c);
-    until c = '=';
+            read(a, c);
+            if c = '=' then
+                count := count + 1;
+            if (c = '#') or (eoln(a)) then
+                readln(a);
+        until count = num;
     read(a,c);
     
-    while not eoln(a) do
+    while (not eoln(a)) and (c <> '#') do
         begin
             read(a,c);
             s := s + c;
         end;
+    if c = '#' then
+        delete(s,length(s)-1,2);
 
     ReadF_integer := StrToInt(s);
 end;
@@ -51,22 +50,22 @@ begin
     reset(a);
     count := 0;
         repeat
-            while (not eoln(a)) do
-                read(a, c);
-            readln(a);
-            count := count + 1;
-        until count = num - 1;
-
-    repeat
-        read(a,c);
-    until c = '=';
+            read(a, c);
+            if c = '=' then
+                count := count + 1;
+            if (c = '#') or (eoln(a)) then
+                readln(a);
+        until count = num;
     read(a,c);
     
-    while not eoln(a) do
+    while (not eoln(a)) and (c <> '#') do
         begin
             read(a,c);
             s := s + c;
         end;
+    if c = '#' then
+        delete(s,length(s)-1,2);
+
     ReadF_real := StrToFloat(s);
 end;
 

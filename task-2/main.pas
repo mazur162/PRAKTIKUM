@@ -305,22 +305,22 @@ begin
     rewrite(log);
 
 end;
-
     writeln('______________________________________________');
 
     Create_New(pop);
     Pop_Output (pop);
 
-    Check(pop);
+    if Check(pop) then
+            halt;
     writeln;
     
     writeln('______________________________________________');
-
+    
     repeat
 
         writeln(' Iteration N ', iters+1);
         writeln;
-
+        
         writeln('________________ SELECTION ___________________');
         
         Crt.Textcolor(Magenta);
@@ -335,9 +335,11 @@ end;
             2: Cut_Select (pop);
         end;
 
+
         writeln;
         Pop_Output (pop);
-        Check(pop);
+        if Check(pop) then
+            halt;
         writeln;
 
         writeln('______________ CROSSBREEDING _________________');
@@ -361,9 +363,10 @@ end;
 
 
         Pop_Output (pop);
-        Check(pop);
+        if Check(pop) then
+            halt;
         writeln;
-
+    
         
         writeln('________________ MUTATION ___________________');
 
@@ -382,20 +385,22 @@ end;
             3: Reverse_Mut (pop);
         end;
         Pop_Output (pop);
-        Check(pop);
+        if Check(pop) then
+            halt;
         Bubble_Sort_Decrease (pop, population_volume);
 
         if pop[1].funct - max < quality_epsilon then
             begin
-                writeln(' The quality of the population has not improved');
+                writeln(' Quality of the population has not improved');
                 valueless_iters := valueless_iters + 1;
             end
         else
                 max := pop[1].funct;
         writeln;
-        Check(pop);
+        if Check(pop) then
+            halt;
         iters := iters + 1;
     until iters = max_iters;
-        
+    
     close(log);
 end.

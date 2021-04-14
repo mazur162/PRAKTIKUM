@@ -15,7 +15,7 @@ type
     bit = 0..1;
     genom = array[0..M-1] of bit; // Геном одной особи
     individ = record // Особь
-        gen: genom;
+        gen: longword;
         funct: real;
         alive: boolean;
     end;
@@ -56,15 +56,18 @@ var
     parametrs: text; // Файл с параметрами
     log: text; // Файл с популяциями решений
 
-    function F (x: real): real;
+    function F (y: longword): double;
     procedure Bubble_Sort_Decrease (var p: popul; length: integer);
     function Convert_OX(var h: genom): real;
 
 implementation
 
 // Функция (вариант 1)
-function F (x: real): real;
+function F (y: longword): double;
+var
+    x: double;
 begin
+    x := y * 4 / power(2,M);
     F := (x - 2) * (x - 2.5) * (x - 3.5) * (1 - exp(x - 1.5));
 end;
 
@@ -73,7 +76,7 @@ procedure Bubble_Sort_Decrease (var p: popul; length: integer);
 var
     i, j: integer;
     m: real;
-    k: genom;
+    k: longword;
 begin
     for i := (length - 1) downto 1 do
         for j := 1  to i do
