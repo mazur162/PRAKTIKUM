@@ -3,24 +3,23 @@ unit CrossBreeding;
 interface
 
 uses
-    FuncSort, PopModule;
+    FuncSort, PopModule, Mutation;
 
 procedure OnePoint_Cross (var pop: popul);
 procedure TwoPoints_Cross (var pop: popul);
 procedure Universal_Cross (var pop: popul);
 procedure Uniform_Cross (var pop: popul);
+procedure Change (var x, y: longword; t2, t1: integer);
 
 implementation
 
 // меняет местами биты двух генов
 
-procedure cross (a, b: longword ; t2, t1: integer; var x, y: longword);
+procedure Change (var x, y: longword; t2, t1: integer);
 var gen1, gen2, gen_x, gen_y: longword ;
 begin
     gen1 := 1 shl t1;
     gen2 := 1 shl t2;
-    x := a;
-    y := b;
     gen1 := gen1*2 - gen2;
     gen_x := x and gen1;
     gen_y := y and gen1;
@@ -29,24 +28,6 @@ begin
     y := y and gen1;
     x := x or gen_y;
     y := y or gen_x;
-end;
-
-// скрещивание с маской
-
-procedure cross_odin (a, b, t: longword; var x: longword);
-var t1, i: integer;
-    nan: longword;
-begin
-    x := 0;
-    for i := 0 to M do
-    begin
-        t1 := round(exp(i*ln(2)));
-        t1 := t1 and t;
-        if (t1 = 0) then
-            cross(x, a, i, i, x, nan)
-        else
-            cross(x, b, i, i, x, nan);
-    end;
 end;
 
 // СКРЕЩИВАНИЕ:
@@ -74,7 +55,19 @@ begin
         p2 := random (population_volume);
         if (not pop[p1].alive) or (not pop[p1].alive) then
             OnePoint_Cross (pop);
-        cross(pop[p1].gen, pop[p2].gen, n, n, pop[j].gen, pop[j].gen);
+        for i := 1 to M do 
+            if i < n then
+                begin
+                    Change (pop[j].gen, pop[p1].gen, i, i);
+                    pop[j].funct := F(pop[j].gen);
+                end
+                // берём из первого родителя
+            else
+                begin
+                    Change (pop[j].gen, pop[p2].gen, i, i);
+                    pop[j].funct := F(pop[j].gen);
+                end;
+                // берём из второго родителя
         pop[j].funct := F (pop[j].gen);
         pop[j].alive := true;
         dead_number := dead_number - 1;
@@ -117,7 +110,21 @@ begin
         p2 := random (population_volume);
         if (not pop[p1].alive) or (not pop[p1].alive) then
             TwoPoints_Cross (pop);
-        cross(pop[p1].gen, pop[p2].gen, n1, n2, pop[j].gen, pop[j].gen);
+        for i := 1 to M do 
+            begin
+                if (i < n1) or (i > n2) then
+                    begin
+                        Change (pop[j].gen, pop[p1].gen, i, i);
+                        pop[j].funct := F(pop[j].gen);
+                    end
+                    // берём из первого родителя
+                else
+                    begin
+                        Change (pop[j].gen, pop[p2].gen, i, i);
+                        pop[j].funct := F(pop[j].gen);
+                    end;
+                    // берём из второго родителя
+            end;
         pop[j].funct := F (pop[j].gen);
         pop[j].alive := true;
         dead_number := dead_number - 1;
@@ -152,11 +159,12 @@ begin
             Universal_Cross (pop);
         for i := 1 to M do 
             begin
-                k := random(2) mod 2;
+                k := random(1) + 1;
                 case k of
-                    1: cross(pop[p1].gen, pop[p1].gen, 0, M-1, pop[j].gen, pop[j].gen);
-                    2: cross(pop[p2].gen, pop[p2].gen, 0, M-1, pop[j].gen, pop[j].gen);
+                    1: Change (pop[j].gen, pop[p1].gen, i, i);
+                    2: Change (pop[j].gen, pop[p2].gen, i, i);
                 end;
+                pop[j].funct := F (pop[j].gen);
             end;
         pop[j].funct := F (pop[j].gen);
         pop[j].alive := true;
@@ -169,10 +177,22 @@ end;
 // Однородное скрещивание
 procedure Uniform_Cross (var pop: popul);
 var
-    i, j: integer;
+    i, j, k: integer;
+    mask : genom;
     p1, p2, dead_number: integer;
+    one, zero: bit;
 begin
-   
+    one := 1;
+    zero := 0;
+    for i:= 1 to M do
+        begin
+            k := random(2) mod 2;
+            if k = 0 then
+                mask[i] := zero
+            else
+                mask[i] := one;
+        end;
+        
     dead_number := 0;
     for i := 1 to population_volume do
         if not pop[i].alive then
@@ -189,9 +209,19 @@ begin
         p2 := random (population_volume);
         if (not pop[p1].alive) or (not pop[p1].alive) then
                 Uniform_Cross (pop);
-        cross_odin(pop[p1].gen, pop[p2].gen, i, pop[j].gen);
+        for i := 1 to M do 
+            if mask[i] = 0 then
+                begin
+                    Change (pop[j].gen, pop[p1].gen, i, i);
+                    pop[j].funct := F(pop[j].gen);
+                end
+            else
+                begin
+                    Change (pop[j].gen, pop[p2].gen, i, i);
+                    pop[j].funct := F(pop[j].gen);
+                end;
 
-        pop[j].funct := F(pop[j].gen);
+        pop[j].funct := F (pop[j].gen);
         pop[j].alive := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
