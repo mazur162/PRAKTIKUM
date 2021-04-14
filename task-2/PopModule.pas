@@ -10,29 +10,30 @@ uses
     procedure Kill(var pop: popul; i: integer);
     procedure Ident(var pop: popul);
     procedure Pop_Output (var pop: popul);
-    procedure Check (var pop: popul);
+    function Check (var pop: popul): boolean;
 
 implementation
 
-procedure Check (var pop: popul);
+function Check (var pop: popul): boolean;
 begin
+    Check := false;
     if valueless_iters > max_valueless_iters then
         begin
             writeln(' We have reached max_valueless_iters. Stop');
             Best(pop);
-            halt;
+            Check := true;
         end;
     if iters >= max_iters then
         begin
             writeln(' We have reached max_iters. Stop');
             Best(pop);
-            halt;
+            Check := true;
         end;
     if max >= enough_function_value then
         begin
             writeln(' We have reached enough_function_value. Stop');
             Best(pop);
-            halt;
+            Check := true;
         end;
 end;
 
@@ -41,7 +42,7 @@ procedure Best (var pop: popul);
 begin
     Crt.TextColor(Green);
     writeln(' Best value: ');
-    writeln(' X = ', FloatToStr(Convert_OX(pop[1].gen)));
+    writeln(' X = ', FloatToStr(4/round(exp(M*ln(2)))*pop[1].gen));
     writeln(' F(x) = ', FloatToStr(pop[1].funct));
     Crt.TextColor(Black);
     if pop[1].funct > max  then
@@ -54,15 +55,14 @@ end;
 // Генерация случайной популяции
 procedure Create_New(var p: popul);
 var
-    i, j: integer;
+    i: integer;
 begin
     for i := 1 to population_volume do
         begin
-            for j := 0 to (M - 1) do
-                p[i].gen[j] := random(2) mod 2;
-                p[i].alive := true;
-                p[i].funct := F (Convert_OX(p[i].gen));
-            end;
+            p[i].gen := random(round(exp(M*ln(2))));
+            p[i].alive := true;
+            p[i].funct := F (p[i].gen);
+        end;
     Bubble_Sort_Decrease(pop,population_volume);
 end;
 
@@ -72,21 +72,6 @@ begin
     pop[i].alive := false;
 end;
 
-function Equal(var pop: popul; i, j: integer): boolean;
-var
-    k: integer;
-    c: boolean;
-begin
-    c := true;
-    for k := 1 to (M - 1) do
-        if pop[i].gen[k] <> pop[j].gen[k] then
-        begin
-            c := false;
-            break;
-        end;
-    Equal := c;
-end;
-
 // Замена дубликатов случайными новыми особями
 procedure Ident(var pop: popul); 
 var
@@ -94,18 +79,23 @@ var
 begin
     for i := 1 to population_volume do
         for j := 1 to population_volume do
-            if Equal(pop,i,j) and (pop[i].alive) and
+            if (pop[i].gen = pop[j].gen ) and (pop[i].alive) and
                 (pop[j].alive) and (i<>j) then
                 begin
-                    for k := 1 to (M - 1) do
-                        pop[j].gen[k] := random(2) mod 2;
-                    pop[j].funct := F (Convert_OX (pop[j].gen));
+                    pop[j].funct := random(round(exp(M*ln(2))));
+                    pop[j].funct := F (pop[j].gen);
                 end;
     Bubble_Sort_Decrease (pop, population_volume);
 end;
 
 procedure Pop_Output (var pop: popul);
 begin
+    for j := 1 to population_volume do
+        if (pop[j].gen) > round(exp(M*ln(2))) then
+            begin
+                pop[j].gen := pop[j].gen - round(exp(M*ln(2)));
+                pop[j].funct := F (pop[j].gen);
+            end;
     Bubble_Sort_Decrease (pop, population_volume);
     if mode = 0 then
         begin
@@ -116,16 +106,16 @@ begin
                 if pop[j].alive then
                     begin
                         write(log,' ', round(j):5, '           ');
-                        for k := 0 to (M - 1) do
-                            write(log, pop[j].gen[k]);
+                        for i := M-1 downto 0 do
+                            write(log, (pop[j].gen shr i) and 1);
                         write(log, '     ');
-                        x := Convert_OX (pop[j].gen);
-                        write(log, x:2:12, '     ');
-                        writeln(log, (F (x)):3:13);
+                        
+                        write(log, (4/round(exp(M*ln(2)))*pop[j].gen):2:12, '     ');
+                        writeln(log, (F (pop[j].gen)):3:13);
                     end;
             writeln(log);
             writeln(log, ' Best value: ');
-            writeln(log, ' X = ', FloatToStr(Convert_OX(pop[1].gen)));
+            writeln(log, ' X = ', FloatToStr(pop[1].gen));
             writeln(log, ' F(x) = ', FloatToStr(pop[1].funct));
             writeln(log);
 
@@ -144,13 +134,12 @@ begin
                                 else
                                     Crt.TextColor(Black);
                                 write(' ', round(j):5, '           ');
-                                for k := 0 to (M - 1) do
-                                    write(pop[j].gen[k]);
+                                for i := M-1 downto 0 do
+                                    write((pop[j].gen shr i) and 1);
                                 write('     ');
-                                x := Convert_OX(pop[j].gen);
-                                write(x:2:12, '     ');
-                                writeln((F (x)):3:13);
-                        end;
+                                write((4/round(exp(M*ln(2)))*pop[j].gen):2:12, '     ');
+                                writeln((F (pop[j].gen)):3:13);
+                            end;
                 end;
         end;
     writeln;

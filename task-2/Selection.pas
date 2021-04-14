@@ -24,8 +24,7 @@ begin
             j := preserved_high_positions + random(N);
             if i <> j then
                 begin
-                    if F (Convert_OX(pop[i].gen)) >
-                        F (Convert_OX(pop[j].gen)) then
+                    if F (pop[i].gen) > F (pop[j].gen) then
                         begin
                             loser_index := j;
                             winner_index := i;
@@ -40,8 +39,8 @@ begin
             Tournament_Select(pop);
         Kill(pop,loser_index);
         writeln;
-        writeln(' Tournament: Individ N', i, ' VS Individ N', j);
-        writeln(' Winner: Individ N', winner_index);
+        writeln(' Tournament: Individ N ', i, ' VS Individ N' , j);
+        writeln(' Winner: Individ N ', winner_index);
         writeln(' Individ N ',loser_index,' was killed');
     end;
 end;
@@ -68,7 +67,7 @@ begin
                     begin
                         Kill(pop,i);
                         writeln(' ',l,') Individ N ',i,' was killed');
-                        l := l+1;
+                        l := l + 1;
                     end;
             until l = N0 + 1;
         end;

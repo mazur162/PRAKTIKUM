@@ -1,0 +1,38 @@
+ population_volume = 30
+ # размер популяции
+
+ quality_epsilon = 0.00001 # эпсилон улучшения популяции
+
+ max_iters = 500 # максимальное число итераций
+
+ max_valueless_iters = 200
+ # максимальное число итераций без улучшения качества
+
+ enough_function_value = 11 # достаточное значение функции
+
+ preserved_high_positions = 5 # защищенные верхние значения
+
+ preserved_low_positions = 4 # защищенные нижние значения
+
+ variability = 0.5 # доля муштрующих особей
+
+ mode = 0 # режим ( 0 - тестовый, 1 - основной )
+
+ log_screen_output = 1 # выводить ли популяцию на экран? ( 0 - нет, 1 - да )
+
+ select = 2 # тип селекции
+ # 1: Tournament_Select
+ # 2: Cut_Select
+
+ cross = 1 # тип скрещивания
+ # 1: OnePoint_Cross
+ # 2: TwoPoints_Cross
+ # 3: Universal_Cross
+ # 4: Uniform_Cross
+
+ mutat = 3 # тип мутации
+ # 1: OneBit_Mut
+ # 2: TwoBits_Swap_Mut
+ # 3: Reverse_Mut
+
+

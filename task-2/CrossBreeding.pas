@@ -3,14 +3,32 @@ unit CrossBreeding;
 interface
 
 uses
-    FuncSort, PopModule;
+    FuncSort, PopModule, Mutation;
 
 procedure OnePoint_Cross (var pop: popul);
 procedure TwoPoints_Cross (var pop: popul);
 procedure Universal_Cross (var pop: popul);
 procedure Uniform_Cross (var pop: popul);
+procedure Change (var x, y: longword; t2, t1: integer);
 
 implementation
+
+// меняет местами биты двух генов
+
+procedure Change (var x, y: longword; t2, t1: integer);
+var gen1, gen2, gen_x, gen_y: longword ;
+begin
+    gen1 := 1 shl t1;
+    gen2 := 1 shl t2;
+    gen1 := gen1*2 - gen2;
+    gen_x := x and gen1;
+    gen_y := y and gen1;
+    gen1 := not gen1;
+    x := x and gen1;
+    y := y and gen1;
+    x := x or gen_y;
+    y := y or gen_x;
+end;
 
 // СКРЕЩИВАНИЕ:
 
@@ -39,12 +57,18 @@ begin
             OnePoint_Cross (pop);
         for i := 1 to M do 
             if i < n then
-                pop[j].gen[i] := pop[p1].gen[i] mod 2
+                begin
+                    Change (pop[j].gen, pop[p1].gen, i, i);
+                    pop[j].funct := F(pop[j].gen);
+                end
                 // берём из первого родителя
             else
-                pop[j].gen[i] := pop[p2].gen[i] mod 2;
+                begin
+                    Change (pop[j].gen, pop[p2].gen, i, i);
+                    pop[j].funct := F(pop[j].gen);
+                end;
                 // берём из второго родителя
-        pop[j].funct := F (Convert_OX(pop[j].gen));
+        pop[j].funct := F (pop[j].gen);
         pop[j].alive := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
@@ -89,13 +113,19 @@ begin
         for i := 1 to M do 
             begin
                 if (i < n1) or (i > n2) then
-                    pop[j].gen[i] := pop[p1].gen[i] mod 2
+                    begin
+                        Change (pop[j].gen, pop[p1].gen, i, i);
+                        pop[j].funct := F(pop[j].gen);
+                    end
                     // берём из первого родителя
                 else
-                    pop[j].gen[i] := pop[p2].gen[i] mod 2;
+                    begin
+                        Change (pop[j].gen, pop[p2].gen, i, i);
+                        pop[j].funct := F(pop[j].gen);
+                    end;
                     // берём из второго родителя
             end;
-        pop[j].funct := F (Convert_OX(pop[j].gen));
+        pop[j].funct := F (pop[j].gen);
         pop[j].alive := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
@@ -129,13 +159,14 @@ begin
             Universal_Cross (pop);
         for i := 1 to M do 
             begin
-                k := random(2) mod 2;
+                k := random(1) + 1;
                 case k of
-                    1: pop[j].gen[i] := pop[p1].gen[i] mod 2;
-                    2: pop[j].gen[i] := pop[p2].gen[i] mod 2;
+                    1: Change (pop[j].gen, pop[p1].gen, i, i);
+                    2: Change (pop[j].gen, pop[p2].gen, i, i);
                 end;
+                pop[j].funct := F (pop[j].gen);
             end;
-        pop[j].funct := F (Convert_OX(pop[j].gen));
+        pop[j].funct := F (pop[j].gen);
         pop[j].alive := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
@@ -180,11 +211,17 @@ begin
                 Uniform_Cross (pop);
         for i := 1 to M do 
             if mask[i] = 0 then
-                pop[j].gen[i] := pop[p1].gen[i] mod 2
+                begin
+                    Change (pop[j].gen, pop[p1].gen, i, i);
+                    pop[j].funct := F(pop[j].gen);
+                end
             else
-                pop[j].gen[i] := pop[p2].gen[i] mod 2;
+                begin
+                    Change (pop[j].gen, pop[p2].gen, i, i);
+                    pop[j].funct := F(pop[j].gen);
+                end;
 
-        pop[j].funct := F (Convert_OX(pop[j].gen));
+        pop[j].funct := F (pop[j].gen);
         pop[j].alive := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
