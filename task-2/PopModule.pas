@@ -82,7 +82,7 @@ begin
             if (pop[i].gen = pop[j].gen ) and (pop[i].alive) and
                 (pop[j].alive) and (i<>j) then
                 begin
-                    pop[j].funct := random(round(exp(M*ln(2))));
+                    pop[j].gen := random(round(exp(M*ln(2))));
                     pop[j].funct := F (pop[j].gen);
                 end;
     Bubble_Sort_Decrease (pop, population_volume);
