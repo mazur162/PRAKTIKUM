@@ -122,8 +122,6 @@ begin
     Bubble_Sort_Decrease (pop, population_volume);
 end;
 
-
-
 begin
   
 end.

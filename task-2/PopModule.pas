@@ -96,6 +96,7 @@ begin
                 pop[j].gen := pop[j].gen - round(exp(M*ln(2)));
                 pop[j].funct := F (pop[j].gen);
             end;
+    Ident(pop);
     Bubble_Sort_Decrease (pop, population_volume);
     if mode = 0 then
         begin
