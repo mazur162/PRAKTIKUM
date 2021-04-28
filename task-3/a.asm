@@ -1,261 +1,375 @@
 include console.inc
-
-    Max_Lengthgth equ 511
+    
+    Max_Len equ 511
+    rus_letter_yo_lower equ 241
+    rus_letter_A_Upper equ 128
+    rus_letter_yo_Upper equ 240
+    rus_letter_ya_Upper equ 159
+    rus_letter_p_lower equ 175
+    rus_letter_r_lower equ 224
+    rus_letter_shc_Upper equ 153
+    rus_letter_ye_Upper equ 133
 
 .data
-        Array1 db 2*Max_Lengthgth dup (0) ; первый текст
-        Array2 db 2*Max_Lengthgth dup (0) ; второй текст
-        Arr_U db 256 dup (0) ; массив уникальных символов
-        Arr_Length_1 dw ? ; длина первого текста
-        Arr_Length_2 dw ? ; длина второго текста
-        Arr_Un_1 dw ? ; количество уникальных символов в 1 тексте
-        Arr_Un_2 dw ? ; количество уникальных символов во 2 тексте
-
-        Hello_message db ' Hello! It is Text Conversion program', 0
-        Rule1_message db ' Rule 1: Symmetrical Letter (A -> Z, б -> ю)', 0
-        Rule2_message db ' Rule 2: Text Reverse', 0
+    Arr_1 db 2*Max_Len dup (0) ;РїРµСЂРІС‹Р№ С‚РµРєСЃС‚
+    Arr_2 db 2*Max_Len dup (0) ;РІС‚РѕСЂРѕР№ С‚РµРєСЃС‚
+    Arr_U db 256 dup (0)       ;РјР°СЃСЃРёРІ СѓРЅРёРєР°Р»СЊРЅС‹С… СЃРёРјРІРѕР»РѕРІ
+    Arr_Len_1 dw ?             ;РґР»РёРЅР° РїРµСЂРІРѕРіРѕ С‚РµРєСЃС‚Р°
+    Arr_Len_2 dw ?             ;РґР»РёРЅР° РІС‚РѕСЂРѕРіРѕ С‚РµРєСЃС‚Р°
+    Arr_Un_1 dw ?              ;РєРѕР»РёС‡РµСЃС‚РІРѕ СѓРЅРёРєР°Р»СЊРЅС‹С… СЃРёРјРІРѕР»РѕРІ РІ 1 С‚РµРєСЃС‚Рµ
+    Arr_Un_2 dw ?              ;РєРѕР»РёС‡РµСЃС‚РІРѕ СѓРЅРёРєР°Р»СЊРЅС‹С… СЃРёРјРІРѕР»РѕРІ РІРѕ 2 С‚РµРєСЃС‚Рµ
 
 .code
 
-;Ввод массива
-;На вход подаётся адрес начала массива
-;на eax результат по условию
+;Р’РІРѕРґ РјР°СЃСЃРёРІР°
+;РќР° РІС…РѕРґ РїРѕРґР°С‘С‚СЃСЏ Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° РјР°СЃСЃРёРІР°
+;РЅР° eax СЂРµР·СѓР»СЊС‚Р°С‚ РїРѕ СѓСЃР»РѕРІРёСЋ
 
 Array_Input proc
-        push ebp
-        mov ebp, esp
-        push edx
-        push ebx
-        mov ebx, [ebp + 8]
-        xor eax, eax
-        xor ecx, ecx
-        xor edx, edx
-
+    push ebp
+    mov ebp, esp
+    push edx
+    push ebx
+    mov ebx, [ebp + 8]
+    xor eax, eax
+    xor ecx, ecx
+    xor edx, edx
+    
 Array_Input_Begin:
-        inchar al
-        cmp al, '\'
-        je Array_Input_Slash
+    inchar al
+    cmp edx, 1
+    je Array_Input_Length_Check
 
-        cmp al, '_'
-        je Array_Input_Rule1_Exit_Symbol
+    cmp al, '\'
+    je Array_Input_Slash
 
-        Array_Input_Lengthgth_Check:
-        mov edx, 0
-        cmp ecx, Max_Lengthgth
-        jae Array_Input_Not_Text
-        inc ecx
-        mov byte ptr [ebx], al
-        inc ebx
-        jmp Array_Input_Begin
+    cmp al, '_'
+    je Array_Input_First_Exit_Symbol
+    
+Array_Input_Length_Check:
+    mov edx, 0
+    cmp ecx, Max_Len
+    jae Array_Input_Not_Text
+    inc ecx
+    mov byte ptr [ebx], al
+    inc ebx
+    jmp Array_Input_Begin
 
-Array_Input_Rule1_Exit_Symbol:
-        inchar al
-        cmp al, '@'
-        je Array_Input_Rule2_Exit_Symbol
-        add ecx, 1
-        cmp ecx, Max_Lengthgth
-        je Array_Input_Not_Text
-        mov byte ptr [ebx], '_'
-        add ebx, 1
-        jmp Array_Input_Lengthgth_Check
-
-Array_Input_Rule2_Exit_Symbol:
-        inchar al
-        cmp al, '_'
-        je Array_Input_Exit_Symbols
-        add ecx, 1
-        cmp ecx, Max_Lengthgth
-        je Array_Input_Not_Text
-        mov byte ptr [ebx], '_'
-        inc ebx
-        inc ecx
-        mov byte ptr [ebx], '@'
-        inc ebx
-        inc ecx
-        jmp Array_Input_Lengthgth_Check
+Array_Input_First_Exit_Symbol:
+    inchar al
+    cmp al, '@'
+    je Array_Input_Second_Exit_Symbol
+    mov edx, 0
+    inc ecx
+    cmp ecx, Max_Len
+    je Array_Input_Not_Text
+    mov byte ptr [ebx], '_'
+    inc ebx
+    cmp al, '\'
+    je Array_Input_Slash
+    jmp Array_Input_Length_Check
+    
+Array_Input_Second_Exit_Symbol:
+    inchar al
+    cmp al, '_'
+    je Array_Input_Exit_Symbols
+    add ecx, 1
+    cmp ecx, Max_Len
+    je Array_Input_Not_Text
+    mov byte ptr [ebx], '_'
+    inc ebx
+    inc ecx
+    mov byte ptr [ebx], '@'
+    inc ebx
+    inc ecx
+    jmp Array_Input_Length_Check
 
 Array_Input_Exit_Symbols:
-        cmp edx, 0
-        je Array_Input_Next
-        add ecx,3
-        mov byte ptr [ebx], '_'
-        mov byte ptr [ebx + 1], '@'
-        mov byte ptr [ebx + 2], '_'
-        add ebx, 3
-        xor edx, edx
-        jmp Array_Input_Begin
-
-Array_Input_Next:
-        cmp ecx, 0
-        je Array_Input_Not_Text
-        mov eax, 1 ; текст
-        jmp Array_Input_Exit
+    cmp edx, 0
+    je Array_Input_Next
+    add ecx,3
+    mov byte ptr [ebx], '_'
+    mov byte ptr [ebx + 1], '@'
+    mov byte ptr [ebx + 2], '_'
+    add ebx, 3
+    xor edx, edx
+    jmp Array_Input_Begin
+    
+Array_Input_Next:	
+    cmp ecx, 0
+    je Array_Input_Not_Text
+    mov eax, 1 ; С‚РµРєСЃС‚
+    jmp Array_Input_Exit
 
 Array_Input_Slash:
-        cmp edx, 1
-        je Array_Input_Lengthgth_Check
-        mov edx, 1
-        jmp Array_Input_Begin
+    cmp edx, 1
+    je Array_Input_Length_Check
+    mov edx, 1 ; Р±С‹Р» РІРІРµРґС‘РЅ СЃР»СЌС€
+    jmp Array_Input_Begin
 
 Array_Input_Not_Text:
-        mov eax, 0
+    mov eax, 0
 
-        Array_Input_Exit:
-        pop edx
-        pop ebx
-        pop ebp
-        ret 4
+Array_Input_Exit:
+    pop edx
+    pop ebx
+    pop ebp
+    ret 4
 Array_Input endp
 
-;Вывод текста
-;на вход подаётся адрес начала массива
+;Р’С‹РІРѕРґ С‚РµРєСЃС‚Р° 
+;РЅР° РІС…РѕРґ РїРѕРґР°С‘С‚СЃСЏ Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° РјР°СЃСЃРёРІР°
 
 Array_Output proc
-        push ebp
-        mov ebp, esp
-        mov ebx, [ebp + 8]
 
-        outstrln '"""'
+    push ebp
+    mov ebp, esp
+    mov ebx, [ebp + 8]
+
+    outstrln '"""'
 
 Array_Output_Start:
-        xor eax, eax
-        mov eax, [ebx]
-        cmp eax, 0 ;проверяем на символ конца текста
-        je Array_Output_End
+    xor eax, eax
+    mov eax, [ebx]
+    cmp eax, 0 ;РїСЂРѕРІРµСЂСЏРµРј РЅР° СЃРёРјРІРѕР» РєРѕРЅС†Р° С‚РµРєСЃС‚Р°
+    je Array_Output_End
 
-        jmp Array_Output_Next
+    jmp Array_Output_Next
 
 Array_Output_Next:
-        outchar al
-        inc ebx
-        jmp Array_Output_Start
+    ConsoleMode
+    outchar al
+    ConsoleMode
+    inc ebx
+    jmp Array_Output_Start
 
 Array_Output_End:
-        newline
-        outstrln '"""'
-
-        pop ebp
-        ret 4
+    newline
+    outstrln '"""'
+    
+    pop ebp
+    ret 4
 
 Array_Output endp
 
-; Процедура подсчета длины текста (уникальных символов)
-; Результат на ax
+; РџСЂРѕС†РµРґСѓСЂР° РїРѕРґСЃС‡РµС‚Р° РґР»РёРЅС‹ С‚РµРєСЃС‚Р° (СѓРЅРёРєР°Р»СЊРЅС‹С… СЃРёРјРІРѕР»РѕРІ)
+; Р РµР·СѓР»СЊС‚Р°С‚ РЅР° ax
 
-        Array_Count_Length proc
-        push ebp
-        mov ebp,esp
-        push ebx
-        push ecx
-        push edx
-        push edi
-        mov ebx, [ebp + 8] ; адрес начала массива
-        mov cx, [ebp + 12] ; длина массива
+Array_Count_Len proc
+    push ebp
+    mov ebp,esp
+    push ebx
+    push ecx
+    push edx
+    push edi
+    mov ebx, [ebp + 8] ; Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° РјР°СЃСЃРёРІР°
+    mov cx, [ebp + 12] ; РґР»РёРЅР° РјР°СЃСЃРёРІР°
+    
+    xor edx, edx
 
-        xor edx, edx
+Array_Count_Begin: 
+    mov al, byte ptr [ebx]
+    cmp al, 10
+    je Array_Count_Next
+    cmp al, 13
+    je Array_Count_Next
+    inc Arr_U[eax]
 
-Array_Count_Begin:
-        mov al, byte ptr [ebx]
-        cmp al, 10
-        je Array_Count_Next
-        cmp al, 13
-        je Array_Count_Next
-        inc Arr_U[eax]
+Array_Count_Next:	
+    inc ebx
+    inc dx
+    cmp dx, cx
+    jb Array_Count_Begin
+    xor edx, edx
 
-Array_Count_Next:
-        inc ebx
-        inc dx
-        cmp dx, cx
-
-        jb Array_Count_Begin
-        xor edx, edx
-
-Array_Count_Symbols:
-        cmp Arr_U[edx], 0
-        je Array_Count_Check
-        inc di
-        
+Array_Count_Symbols: 
+    cmp Arr_U[edx], 0
+    je Array_Count_Check
+    inc di
 
 Array_Count_Check:
-        inc edx
+    inc edx
+    cmp edx, 256
+    jb Array_Count_Symbols
+    
+    xor ebx, ebx  
+Array_Count_Set_Zero: 
+    mov Arr_U[ebx], 0
+    inc ebx
+    cmp ebx, 256
+    jb Array_Count_Set_Zero
 
-        cmp edx, 256
-        jb Array_Count_Symbols
+    mov ax, di 
+    pop edi
+    pop edx
+    pop ecx
+    pop ebx
+    pop ebp
+    ret 8
+    
+Array_Count_Len endp
 
-        xor ebx, ebx
-Array_Count_Set_Zero:
-        mov Arr_U[ebx], 0
-        inc ebx
-        cmp ebx, 256
-        jb Array_Count_Set_Zero
+;РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ С‚РµРєСЃС‚Р°
+;1) Р·Р°РјРµРЅРёС‚СЊ Р»Р°С‚РёРЅСЃРєСѓСЋ Р±СѓРєРІСѓ СЃРёРјРјРµС‚СЂРёС‡РЅРѕР№
+;РќР° РІС…РѕРґ РїРѕРґР°С‘С‚СЃСЏ Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° РјР°СЃСЃРёРІР°
 
-        mov ax, di
-        pop edi
-        pop edx
-        pop ecx
-        pop ebx
-        pop ebp
-        ret 8
+Text_Conv_First proc
 
-Array_Count_Length endp
+    push ebp
+    mov ebp, esp
+    mov ebx, [ebp + 8]
 
-;Преобразование текста
-;1) заменить латинскую букву симметричной
-;На вход подаётся адрес начала массива
+Text_Conv_First_Start:
+    xor eax, eax
+    mov eax, [ebx]
+    
+    cmp al, 0 ; РїСЂРѕРІРµСЂСЏРµРј РЅР° СЃРёРјРІРѕР» РєРѕРЅС†Р° С‚РµРєСЃС‚Р°
+    je Text_Conv_First_End
 
-Text_Conv_Rule1 proc
+    cmp al, 'A'
+    jb Text_Conv_First_Skip
+    
+    cmp al, 241
+    ja Text_Conv_First_Skip
 
-        push ebp
-        mov ebp, esp
-        mov ebx, [ebp + 8]
+    cmp al, 'Z'
+    ja Text_Conv_First_Check1
+    jmp Text_Conv_First_Change_Upper_ENG
 
-        Text_Conv_Rule1_Start:
-        xor eax, eax
-        mov eax, [ebx]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-        cmp al, 0 ;проверяем на символ конца текста
-        je Text_Conv_Rule1_End
+Text_Conv_First_Check1:
 
-        cmp al, 'A'
-        jb Text_Conv_Rule1_Skip
-        ;проверяем, лежит ли символ
-        cmp al, 'z' ;в промежутке A-z
-        ja Text_Conv_Rule1_Skip
+    cmp al, 'a'
+    jb Text_Conv_First_Skip
+    
+    cmp al, 'z'
+    ja Text_Conv_First_Check2
+    jmp Text_Conv_First_Change_Lower_ENG
 
-        cmp al, 'Z'
-        ja Text_Conv_Rule1_Check
-        jmp Text_Conv_Rule1_Change_Upper
+Text_Conv_First_Check2:
 
-Text_Conv_Rule1_Check:
-        cmp al, 'a'
-        jb Text_Conv_Rule1_Skip
-        jmp Text_Conv_Rule1_Change_Lower
+    cmp al, rus_letter_A_Upper
+    jb Text_Conv_First_Skip
+    
+    cmp al, 175
+    je Text_Conv_First_Skip
 
-Text_Conv_Rule1_Change_Upper:
-        mov al, 'Z'
-        sub al, [ebx] ;[ebx] = Z - [ebx] + A
-        add al, 'A'
-        mov [ebx], al
-        jmp Text_Conv_Rule1_Skip
+    cmp al, 241
+    je Text_Conv_First_Change_Lower_RUS
+    
+    cmp al, 240
+    je Text_Conv_First_Change_Upper_RUS
 
-Text_Conv_Rule1_Change_Lower:
-        mov al, 'z'
-        sub al, [ebx] ;[ebx] = z - [ebx] + a
-        add al, 'a'
-        mov [ebx], al
-        jmp Text_Conv_Rule1_Skip
+    cmp al, rus_letter_ya_Upper
+    ja Text_Conv_First_Check3
+    jmp Text_Conv_First_Change_Upper_RUS
 
-Text_Conv_Rule1_Skip:
-        inc ebx
-        jmp Text_Conv_Rule1_Start
+Text_Conv_First_Check3:
 
-Text_Conv_Rule1_End:
-        pop ebp
-        ret 4
+    cmp al, rus_letter_p_lower
+    jbe Text_Conv_First_Change_Lower_RUS
+    
+    cmp al, rus_letter_r_lower
+    jb Text_Conv_First_Skip
+    jmp Text_Conv_First_Change_Lower_RUS
 
-Text_Conv_Rule1 endp
 
-Text_Conv_Rule2 proc
+Text_Conv_First_Change_Upper_ENG:
+    mov al, 'Z'
+    sub al, [ebx]      ;[ebx] = Z - [ebx] + A
+    add al, 'A'
+    mov [ebx], al
+    jmp Text_Conv_First_Skip
+
+Text_Conv_First_Change_Lower_ENG:
+    mov al, 'z'
+    sub al, [ebx]      ;[ebx] = z - [ebx] + a
+    add al, 'a'
+    mov [ebx], al
+    jmp Text_Conv_First_Skip
+
+
+
+Text_Conv_First_Change_Upper_RUS:
+    mov al, [ebx]
+    cmp al, 240
+    jne F
+    mov al, 153
+    jmp Text_Conv_First_Skip
+F:
+    cmp al, 153
+    jne F1
+    mov al, 240
+    jmp Text_Conv_First_Skip
+F1:
+    cmp al, 133 ; СЃСЂР°РІРЅРёРІР°РµРј СЃ Р•, РµСЃР»Рё Р±РѕР»СЊС€Рµ, С‚Рѕ -1
+    ja L1  
+    jmp L2   
+L1:
+    mov [ebx], al
+    mov al, rus_letter_ya_Upper - 1
+    jmp Q
+L2:
+    mov [ebx], al
+    mov al, rus_letter_ya_Upper
+
+Q:
+    sub al, [ebx]      ; [ebx] = РЇ - [ebx] + Рђ
+    add al, rus_letter_A_Upper
+    mov [ebx], al
+    jmp Text_Conv_First_Skip
+
+Text_Conv_First_Change_Lower_RUS:
+    mov al, [ebx]
+    cmp al, 241
+    jne M
+    mov al, 233
+    jmp Text_Conv_First_Skip
+M:
+    cmp al, 233
+    jne M1
+    mov al, 241
+    jmp Text_Conv_First_Skip
+M1:
+    cmp al, 165 ; СЃСЂР°РІРЅРёРІР°РµРј СЃ Рµ
+    ja M2  
+    jmp K2 
+M2:
+    cmp al, 234 ; СЃСЂР°РІРЅРёРІР°РµРј СЃ СЉ
+    jae K2  
+    jmp K1 
+  
+K1:
+    mov [ebx], al
+    mov al, 254
+    jmp Y
+K2:
+    mov [ebx], al
+    mov al, 255
+
+Y:
+    sub al, [ebx]      
+    add al, 144
+    mov [ebx], al
+    jmp Text_Conv_First_Skip
+
+
+Text_Conv_First_Skip:
+    inc ebx
+    jmp Text_Conv_First_Start
+
+Text_Conv_First_End:
+    pop ebp
+    ret 4
+
+Text_Conv_First endp
+
+;РџСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ С‚РµРєСЃС‚Р°
+;2) СѓРґРІРѕРёС‚СЊ Р·Р°РіР»Р°РІРЅСѓСЋ Р±СѓРєРІСѓ
+;РќР° РІС…РѕРґ РїРѕРґР°С‘С‚СЃСЏ Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° РјР°СЃСЃРёРІР°
+
+Text_Conv_Second proc
 
         push ebp
         mov ebp, esp
@@ -266,45 +380,47 @@ Text_Conv_Rule2 proc
         push esi
 
         mov ebx, [ebp + 8]
-        xor eax, eax
-        xor edx, edx
+        sub eax, eax
+        sub edx, edx
 
-Text_Conv_Rule2_Count_Length:
-        xor ecx, ecx
+Text_Conv_Second_Count_Len:
+        sub ecx, ecx
         mov ecx, [ebx]
         inc ebx
-        cmp cl, 0 ; проверяем на символ конца текста
-        je Text_Conv_Rule2_Div
-        inc ax ;длина на ах
-        jne Text_Conv_Rule2_Count_Length
+        cmp cl, 0 ; РїСЂРѕРІРµСЂСЏРµРј РЅР° СЃРёРјРІРѕР» РєРѕРЅС†Р° С‚РµРєСЃС‚Р°
+        je Text_Conv_Second_Div
+        inc ax ;РґР»РёРЅР° РЅР° Р°С…
+        jne Text_Conv_Second_Count_Len
 
-Text_Conv_Rule2_Div:
+Text_Conv_Second_Div:
+
+        cmp ax, 1
+        je Text_Conv_Second_End
         sub ebx, 2
-        xor esi, esi
-        mov esi, ebx ;сохраняем адрес конца массива
+        sub esi, esi
+        mov esi, ebx ;СЃРѕС…СЂР°РЅСЏРµРј Р°РґСЂРµСЃ РєРѕРЅС†Р° РјР°СЃСЃРёРІР°
 
-        xor ecx, ecx
+        sub ecx, ecx
         mov cx, 2
-        div cx ;делим на 2
+        div cx ;РґРµР»РёРј РЅР° 2
 
-        xor ecx, ecx
-        mov cx, ax ; половина длины на сх
-        mov ebx, [ebp + 8] ;адрес начала массива
+        sub ecx, ecx
+        mov cx, ax ; РїРѕР»РѕРІРёРЅР° РґР»РёРЅС‹ РЅР° СЃС…
+        mov ebx, [ebp + 8] ;Р°РґСЂРµСЃ РЅР°С‡Р°Р»Р° РјР°СЃСЃРёРІР°
 
-Text_Conv_Rule2_Make:
+Text_Conv_Second_Make:
 
-        xor eax, eax
+        sub eax, eax
         mov ah, byte ptr [ebx] ; ah = Array[ebx]
         mov al, byte ptr [esi] ; al = Array[esi]
         mov byte ptr [esi], ah ; Array[esi] := ah
         mov byte ptr [ebx], al ; Array[ebx] = al
-
         inc ebx
         dec esi
 
-Loop Text_Conv_Rule2_Make
+Loop Text_Conv_Second_Make
 
-Text_Conv_Rule2_End:
+Text_Conv_Second_End:
         pop esi
         pop edx
         pop ecx
@@ -313,93 +429,97 @@ Text_Conv_Rule2_End:
         pop ebp
         ret 4
 
-Text_Conv_Rule2 endp
+Text_Conv_Second endp
 
 Start:
-        outstrln offset Hello_message
-        outstrln offset Rule1_message
-        outstrln offset Rule2_message
-        newline
 
-Input_Rule1_Text:
-        outstr ' Text 1: '
-        push offset Array1
-        call Array_Input
-        push eax
-        mov Arr_Length_1, cx
-        push Arr_Length_1
-        push offset Array1
-        call Array_Count_Length
-        mov Arr_Un_1, ax
-        pop eax
-        cmp eax, 0
-        jne Input_Rule2_Text
-        outstrln ' Error! Wrong input'
-        jmp Program_End
+Input_First_Text:
+    outstr ' Text 1: '
+    push offset Arr_1
+    call Array_Input
 
-Input_Rule2_Text:
-        outstr ' Text 2: '
-        flush 
+    cmp eax, 0
+    je ProgramEndNotText
 
-        xor eax, eax
-        push offset Array2
-        call Array_Input
-        push eax
-        mov Arr_Length_2, cx
-        push Arr_Length_2
-        push offset Array2
-        call Array_Count_Length
-        mov Arr_Un_2, ax
-        pop eax
-        cmp eax, 0
-        jne Conv_Case_1
-        outstrln 'Error! Wrong input'
-        jmp Program_End
+    push eax
+    mov Arr_Len_1, cx
+    push Arr_Len_1
+    push offset Arr_1
+    call Array_Count_Len
+    mov Arr_Un_1, ax
+    pop eax
+    cmp eax, 0
+    jne Input_Second_Text
+    outstrln 'Not text, exit'
+    jmp Program_End
+
+Input_Second_Text:
+    outstr ' Text 2: '
+    flush
+
+    xor eax, eax
+    push offset Arr_2
+    call Array_Input
+
+    cmp eax, 0
+    je ProgramEndNotText
+
+    push eax
+    mov Arr_Len_2, cx
+    push Arr_Len_2
+    push offset Arr_2
+    call Array_Count_Len
+    mov Arr_Un_2, ax
+    pop eax
+    cmp eax, 0
+    jne Conv_Case_1
+    outstrln 'Not text, exit'
+    jmp Program_End
 
 Conv_Case_1:
-        xor eax, eax
-        mov ax, Arr_Un_1
-        cmp ax, Arr_Un_2
-        outstr ' Lengthgth 1 = '
-        outintln Arr_Un_1
-        outstr ' Lengthgth 2 = '
-        outintln Arr_Un_2
-
-        jb Conv_Case_2
-        outstrln ' Lengthgth 1 is bigger than Lengthgth 2'
-        outstrln ' Using Rule 1 for Text 1'
-        outstrln ' Using Rule 2 for Text 2'
-
-        push offset Array1
-        call Text_Conv_Rule1
-
-        push offset Array2
-        call Text_Conv_Rule2
-
-        jmp Output
+    xor eax, eax
+    mov ax, Arr_Un_1
+    cmp ax, Arr_Un_2
+    outstr ' Length 1 = '
+    outintln Arr_Un_1
+    outstr ' Length 2 = '
+    outintln Arr_Un_2
+    jb Conv_Case_2
+    outstrln ' First text is longer or they are equal'
+    outstrln ' Change letters to the symmetrical in first text'
+    outstrln ' Reverse second text'
+    
+    push offset Arr_1
+    call Text_Conv_First
+    push offset Arr_2
+    call Text_Conv_Second
+     
+    jmp Output
 Conv_Case_2:
-        outstrln ' Lengthgth 1 is smaller than Lengthgth 2'
-        outstrln ' Using Rule 2 for Text 1'
-        outstrln ' Using Rule 1 for Text 2'
-        
-        push offset Array1
-        call Text_Conv_Rule2
-
-        push offset Array2
-        call Text_Conv_Rule1
-        jmp Output
+    outstrln ' Second text is longer'
+    outstrln ' Reverse first text'
+    outstrln ' Change letters to the symmetrical in second text'
+    
+    push offset Arr_1
+    call Text_Conv_Second
+    push offset Arr_2
+    call Text_Conv_First
+    jmp Output
 
 Output:
-        newline
-        outstrln ' Text 1 after conversion: '
-        push offset Array1
-        call Array_Output
+    outstrln ' First text after conversion'
+    push offset Arr_1
+    call Array_Output
 
-        newline
-        outstrln ' Text 2 after conversion: '
-        push offset Array2
-        call Array_Output
+    outstrln ' Second text after conversion'
+    push offset Arr_2
+    call Array_Output
+    jmp Program_End
+
+ProgramEndNotText:
+    outstrln ' Error! Wrong Input'
 
 Program_End:
-        exit
+    exit
+
 end Start
