@@ -303,9 +303,12 @@ F:
     mov al, 240
     jmp Text_Conv_First_Skip
 F1:
-    cmp al, 133 ; сравниваем с Е, если больше, то -1
-    ja L1  
-    jmp L2   
+    cmp al, 133 ; сравниваем с Е
+    ja L  
+    jmp L2  
+L:
+    cmp al, 153
+    ja L2      
 L1:
     mov [ebx], al
     mov al, rus_letter_ya_Upper - 1
