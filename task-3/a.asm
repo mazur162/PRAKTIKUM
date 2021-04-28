@@ -1,6 +1,6 @@
 include console.inc
     
-    Max_Len equ 511
+    Max_Len equ 512
     Letter_Quotes equ 34
     rus_letter_yo_lower equ 241
     rus_letter_A_Upper equ 128
@@ -193,59 +193,60 @@ Array_Output endp
 ; Процедура подсчета длины текста (уникальных символов)
 ; Результат на ax
 
-Array_Count_Len proc
+;Процедура подсчета количества уникальных символов
+;На вход подается адрес начала массива
+;Результат на ax
+
+Array_Count_Length proc
     push ebp
     mov ebp,esp
     push ebx
     push ecx
     push edx
     push edi
-    mov ebx, [ebp + 8] ; адрес начала массива
-    mov cx, [ebp + 12] ; длина массива
-    
-    xor edx, edx
+
+    mov ebx, [ebp + 8] ;текст
+    mov edx, offset Arr_U ;массив для подсчета символов
+    sub ecx, ecx
+    sub edi, edi
 
 Array_Count_Begin: 
-    mov al, byte ptr [ebx]
-    cmp al, 10
-    je Array_Count_Next
-    cmp al, 13
-    je Array_Count_Next
-    inc Arr_U[eax]
-
-Array_Count_Next:	
+    sub ecx, ecx
+    mov ecx, [ebx]
+    cmp ecx, 0 ; проверка на символ конца текста
+    je Array_Count_Exit
+    sub ecx, ecx
+    mov cl, byte ptr [ebx]
+    inc word ptr [edx + 2 * ecx]
+    mov ax, word ptr [edx + 2 * ecx]
     inc ebx
-    inc dx
-    cmp dx, cx
-    jb Array_Count_Begin
-    xor edx, edx
 
-Array_Count_Symbols: 
-    cmp Arr_U[edx], 0
-    je Array_Count_Check
-    inc di
+Array_Count_Max: ;проверяем максимум повторов символов
+    cmp di, ax
+    jae Array_Count_Begin
+    mov di, ax
+    jmp Array_Count_Begin
 
-Array_Count_Check:
-    inc edx
-    cmp edx, 256
-    jb Array_Count_Symbols
-    
-    xor ebx, ebx  
-Array_Count_Set_Zero: 
-    mov Arr_U[ebx], 0
-    inc ebx
-    cmp ebx, 256
-    jb Array_Count_Set_Zero
+Array_Count_Exit:
+    mov ebx, offset Arr_U
+    mov ecx, 255
 
+Array_Count_Set_Zero: ; обнуляем массив для счета символов
+    mov byte ptr [ebx], 0
+    add ebx, 2
+    Loop Array_Count_Set_Zero
+
+    sub eax, eax
     mov ax, di 
+
     pop edi
     pop edx
     pop ecx
     pop ebx
     pop ebp
-    ret 8
-    
-Array_Count_Len endp
+    ret 4
+Array_Count_Length endp
+
 
 ;Преобразование текста
 ;1) заменить латинскую букву симметричной
@@ -476,25 +477,22 @@ Start:
 
 Input_First_Text:
     outstr ' Text 1: '
+    xor eax, eax 
     push offset Arr_1
     call Array_Input
 
     cmp eax, 0
     je ProgramEndNotText
 
-    push eax
-    mov Arr_Len_1, cx
-    push Arr_Len_1
     push offset Arr_1
-    call Array_Count_Len
+    call Array_Count_Length
     mov Arr_Un_1, ax
-    pop eax
-    cmp eax, 0
-    jne Input_Second_Text
-    outstrln 'Not text, exit'
-    jmp Program_End
+    outstr ' Length 1 = '
+    outintln Arr_Un_1
+    
 
 Input_Second_Text:
+    newline
     outstr ' Text 2: '
     flush
 
@@ -505,26 +503,19 @@ Input_Second_Text:
     cmp eax, 0
     je ProgramEndNotText
 
-    push eax
-    mov Arr_Len_2, cx
-    push Arr_Len_2
     push offset Arr_2
-    call Array_Count_Len
+    mov dx, Arr_Un_1
+    call Array_Count_Length
+    mov Arr_Un_1, dx
     mov Arr_Un_2, ax
-    pop eax
-    cmp eax, 0
-    jne Conv_Case_1
-    outstrln 'Not text, exit'
-    jmp Program_End
-
-Conv_Case_1:
-    xor eax, eax
-    mov ax, Arr_Un_1
-    cmp ax, Arr_Un_2
-    outstr ' Length 1 = '
-    outintln Arr_Un_1
     outstr ' Length 2 = '
     outintln Arr_Un_2
+    newline
+    xor dx, dx
+
+Conv_Case_1:
+    mov ax, Arr_Un_1
+    cmp ax, Arr_Un_2
     jb Conv_Case_2
     outstrln ' Text 1 is longer or they are equal'
     outstrln ' Change letters to the symmetrical in Text 1'
@@ -548,11 +539,15 @@ Conv_Case_2:
     jmp Output
 
 Output:
-    outstrln ' Text 1 after conversion'
+    newline
+    outstrln ' Text 1 after conversion: '
+    outstrln '"""'
     push offset Arr_1
     call Array_Output
 
-    outstrln ' Text 2 after conversion'
+    newline
+    outstrln ' Text 2 after conversion:'
+    outstrln '"""'
     push offset Arr_2
     call Array_Output
     jmp Program_End

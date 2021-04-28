@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 6.14.8444		    04/28/21 23:37:59
+Microsoft (R) Macro Assembler Version 6.14.8444		    04/29/21 00:12:34
 a.asm							     Page 1 - 1
 
 
@@ -20,7 +20,7 @@ a.asm							     Page 1 - 1
 			      C    
 			      C 
 				    
- = 000001FF			    Max_Len equ 511
+ = 00000200			    Max_Len equ 512
  = 00000022			    Letter_Quotes equ 34
  = 000000F1			    rus_letter_yo_lower equ 241
  = 00000080			    rus_letter_A_Upper equ 128
@@ -32,19 +32,19 @@ a.asm							     Page 1 - 1
  = 00000085			    rus_letter_ye_Upper equ 133
 
  00000019			.data
- 00000019  000003FE [		    Arr_1 db 2*Max_Len dup (0) ;первый текст
+ 00000019  00000400 [		    Arr_1 db 2*Max_Len dup (0) ;первый текст
 	    00
 	   ]
- 00000417  000003FE [		    Arr_2 db 2*Max_Len dup (0) ;второй текст
+ 00000419  00000400 [		    Arr_2 db 2*Max_Len dup (0) ;второй текст
 	    00
 	   ]
- 00000815  00000100 [		    Arr_U db 256 dup (0)       ;массив уникальных символов
+ 00000819  00000100 [		    Arr_U db 256 dup (0)       ;массив уникальных символов
 	    00
 	   ]
- 00000915 0000			    Arr_Len_1 dw ?             ;длина первого текста
- 00000917 0000			    Arr_Len_2 dw ?             ;длина второго текста
- 00000919 0000			    Arr_Un_1 dw ?              ;количество уникальных символов в 1 тексте
- 0000091B 0000			    Arr_Un_2 dw ?              ;количество уникальных символов во 2 тексте
+ 00000919 0000			    Arr_Len_1 dw ?             ;длина первого текста
+ 0000091B 0000			    Arr_Len_2 dw ?             ;длина второго текста
+ 0000091D 0000			    Arr_Un_1 dw ?              ;количество уникальных символов в 1 тексте
+ 0000091F 0000			    Arr_Un_2 dw ?              ;количество уникальных символов во 2 тексте
 
  00000000			.code
 
@@ -75,7 +75,7 @@ a.asm							     Page 1 - 1
 				    
  0000003F			Array_Input_Length_Check:
  0000003F  BA 00000000		    mov edx, 0
- 00000044  81 F9 000001FF	    cmp ecx, Max_Len
+ 00000044  81 F9 00000200	    cmp ecx, Max_Len
  0000004A  0F 83 000000C0	    jae Array_Input_Not_Text
  00000050  41			    inc ecx
  00000051  88 03		    mov byte ptr [ebx], al
@@ -88,7 +88,7 @@ a.asm							     Page 1 - 1
  00000078  74 1C		    je Array_Input_Second_Exit_Symbol
  0000007A  BA 00000000		    mov edx, 0
  0000007F  41			    inc ecx
- 00000080  81 F9 000001FF	    cmp ecx, Max_Len
+ 00000080  81 F9 00000200	    cmp ecx, Max_Len
  00000086  0F 84 00000084	    je Array_Input_Not_Text
  0000008C  C6 03 5F		    mov byte ptr [ebx], '_'
  0000008F  43			    inc ebx
@@ -101,7 +101,7 @@ a.asm							     Page 1 - 1
  000000B6  3C 5F		    cmp al, '_'
  000000B8  74 1A		    je Array_Input_Exit_Symbols
  000000BA  83 C1 01		    add ecx, 1
- 000000BD  81 F9 000001FF	    cmp ecx, Max_Len
+ 000000BD  81 F9 00000200	    cmp ecx, Max_Len
  000000C3  74 4B		    je Array_Input_Not_Text
  000000C5  C6 03 5F		    mov byte ptr [ebx], '_'
  000000C8  43			    inc ebx
@@ -219,388 +219,379 @@ a.asm							     Page 1 - 1
 				; Процедура подсчета длины текста (уникальных символов)
 				; Результат на ax
 
- 00000618			Array_Count_Len proc
+				;Процедура подсчета количества уникальных символов
+				;На вход подается адрес начала массива
+				;Результат на ax
+
+ 00000618			Array_Count_Length proc
  00000618  55			    push ebp
  00000619  8B EC		    mov ebp,esp
  0000061B  53			    push ebx
  0000061C  51			    push ecx
  0000061D  52			    push edx
  0000061E  57			    push edi
- 0000061F  8B 5D 08		    mov ebx, [ebp + 8] ; адрес начала массива
- 00000622  66| 8B 4D 0C		    mov cx, [ebp + 12] ; длина массива
-				    
- 00000626  33 D2		    xor edx, edx
 
- 00000628			Array_Count_Begin: 
- 00000628  8A 03		    mov al, byte ptr [ebx]
- 0000062A  3C 0A		    cmp al, 10
- 0000062C  74 0A		    je Array_Count_Next
- 0000062E  3C 0D		    cmp al, 13
- 00000630  74 06		    je Array_Count_Next
- 00000632  FE 80 00000815 R	    inc Arr_U[eax]
+ 0000061F  8B 5D 08		    mov ebx, [ebp + 8] ;текст
+ 00000622  BA 00000819 R	    mov edx, offset Arr_U ;массив для подсчета символов
+ 00000627  2B C9		    sub ecx, ecx
+ 00000629  2B FF		    sub edi, edi
 
- 00000638			Array_Count_Next:	
- 00000638  43			    inc ebx
- 00000639  66| 42		    inc dx
- 0000063B  66| 3B D1		    cmp dx, cx
- 0000063E  72 E8		    jb Array_Count_Begin
- 00000640  33 D2		    xor edx, edx
+ 0000062B			Array_Count_Begin: 
+ 0000062B  2B C9		    sub ecx, ecx
+ 0000062D  8B 0B		    mov ecx, [ebx]
+ 0000062F  83 F9 00		    cmp ecx, 0 ; проверка на символ конца текста
+ 00000632  74 17		    je Array_Count_Exit
+ 00000634  2B C9		    sub ecx, ecx
+ 00000636  8A 0B		    mov cl, byte ptr [ebx]
+ 00000638  66| FF 04 4A		    inc word ptr [edx + 2 * ecx]
+ 0000063C  66| 8B 04 4A		    mov ax, word ptr [edx + 2 * ecx]
+ 00000640  43			    inc ebx
 
- 00000642			Array_Count_Symbols: 
- 00000642  80 BA 00000815 R	    cmp Arr_U[edx], 0
-	   00
- 00000649  74 02		    je Array_Count_Check
- 0000064B  66| 47		    inc di
+ 00000641			Array_Count_Max: ;проверяем максимум повторов символов
+ 00000641  66| 3B F8		    cmp di, ax
+ 00000644  73 E5		    jae Array_Count_Begin
+ 00000646  66| 8B F8		    mov di, ax
+ 00000649  EB E0		    jmp Array_Count_Begin
 
- 0000064D			Array_Count_Check:
- 0000064D  42			    inc edx
- 0000064E  81 FA 00000100	    cmp edx, 256
- 00000654  72 EC		    jb Array_Count_Symbols
-				    
- 00000656  33 DB		    xor ebx, ebx  
- 00000658			Array_Count_Set_Zero: 
- 00000658  C6 83 00000815 R	    mov Arr_U[ebx], 0
-	   00
- 0000065F  43			    inc ebx
- 00000660  81 FB 00000100	    cmp ebx, 256
- 00000666  72 F0		    jb Array_Count_Set_Zero
+ 0000064B			Array_Count_Exit:
+ 0000064B  BB 00000819 R	    mov ebx, offset Arr_U
+ 00000650  B9 000000FF		    mov ecx, 255
 
- 00000668  66| 8B C7		    mov ax, di 
- 0000066B  5F			    pop edi
- 0000066C  5A			    pop edx
- 0000066D  59			    pop ecx
- 0000066E  5B			    pop ebx
- 0000066F  5D			    pop ebp
- 00000670  C2 0008		    ret 8
-				    
- 00000673			Array_Count_Len endp
+ 00000655			Array_Count_Set_Zero: ; обнуляем массив для счета символов
+ 00000655  C6 03 00		    mov byte ptr [ebx], 0
+ 00000658  83 C3 02		    add ebx, 2
+ 0000065B  E2 F8		    Loop Array_Count_Set_Zero
+
+ 0000065D  2B C0		    sub eax, eax
+ 0000065F  66| 8B C7		    mov ax, di 
+
+ 00000662  5F			    pop edi
+ 00000663  5A			    pop edx
+ 00000664  59			    pop ecx
+ 00000665  5B			    pop ebx
+ 00000666  5D			    pop ebp
+ 00000667  C2 0004		    ret 4
+ 0000066A			Array_Count_Length endp
+
 
 				;Преобразование текста
 				;1) заменить латинскую букву симметричной
 				;На вход подаётся адрес начала массива
 
- 00000673			Text_Conv_First proc
+ 0000066A			Text_Conv_First proc
 
- 00000673  55			    push ebp
- 00000674  8B EC		    mov ebp, esp
- 00000676  8B 5D 08		    mov ebx, [ebp + 8]
+ 0000066A  55			    push ebp
+ 0000066B  8B EC		    mov ebp, esp
+ 0000066D  8B 5D 08		    mov ebx, [ebp + 8]
 
- 00000679			Text_Conv_First_Start:
- 00000679  33 C0		    xor eax, eax
- 0000067B  8B 03		    mov eax, [ebx]
+ 00000670			Text_Conv_First_Start:
+ 00000670  33 C0		    xor eax, eax
+ 00000672  8B 03		    mov eax, [ebx]
 				    
- 0000067D  3C 00		    cmp al, 0 ; проверяем на символ конца текста
- 0000067F  0F 84 000000C4	    je Text_Conv_First_End
+ 00000674  3C 00		    cmp al, 0 ; проверяем на символ конца текста
+ 00000676  0F 84 000000C4	    je Text_Conv_First_End
 
- 00000685  3C 41		    cmp al, 'A'
- 00000687  0F 82 000000B6	    jb Text_Conv_First_Skip
+ 0000067C  3C 41		    cmp al, 'A'
+ 0000067E  0F 82 000000B6	    jb Text_Conv_First_Skip
 				    
- 0000068D  3C F1		    cmp al, 241
- 0000068F  0F 87 000000AE	    ja Text_Conv_First_Skip
+ 00000684  3C F1		    cmp al, 241
+ 00000686  0F 87 000000AE	    ja Text_Conv_First_Skip
 
- 00000695  3C 5A		    cmp al, 'Z'
- 00000697  77 02		    ja Text_Conv_First_Check1
- 00000699  EB 36		    jmp Text_Conv_First_Change_Upper_ENG
+ 0000068C  3C 5A		    cmp al, 'Z'
+ 0000068E  77 02		    ja Text_Conv_First_Check1
+ 00000690  EB 36		    jmp Text_Conv_First_Change_Upper_ENG
 
 				;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
- 0000069B			Text_Conv_First_Check1:
+ 00000692			Text_Conv_First_Check1:
 
- 0000069B  3C 61		    cmp al, 'a'
- 0000069D  0F 82 000000A0	    jb Text_Conv_First_Skip
+ 00000692  3C 61		    cmp al, 'a'
+ 00000694  0F 82 000000A0	    jb Text_Conv_First_Skip
 				    
- 000006A3  3C 7A		    cmp al, 'z'
- 000006A5  77 02		    ja Text_Conv_First_Check2
- 000006A7  EB 32		    jmp Text_Conv_First_Change_Lower_ENG
+ 0000069A  3C 7A		    cmp al, 'z'
+ 0000069C  77 02		    ja Text_Conv_First_Check2
+ 0000069E  EB 32		    jmp Text_Conv_First_Change_Lower_ENG
 
- 000006A9			Text_Conv_First_Check2:
+ 000006A0			Text_Conv_First_Check2:
 
- 000006A9  3C 80		    cmp al, rus_letter_A_Upper
- 000006AB  0F 82 00000092	    jb Text_Conv_First_Skip
+ 000006A0  3C 80		    cmp al, rus_letter_A_Upper
+ 000006A2  0F 82 00000092	    jb Text_Conv_First_Skip
 				    
- 000006B1  3C AF		    cmp al, 175
- 000006B3  0F 84 0000008A	    je Text_Conv_First_Skip
+ 000006A8  3C AF		    cmp al, 175
+ 000006AA  0F 84 0000008A	    je Text_Conv_First_Skip
 
- 000006B9  3C F1		    cmp al, 241
- 000006BB  74 56		    je Text_Conv_First_Change_Lower_RUS
+ 000006B0  3C F1		    cmp al, 241
+ 000006B2  74 56		    je Text_Conv_First_Change_Lower_RUS
 				    
- 000006BD  3C F0		    cmp al, 240
- 000006BF  74 24		    je Text_Conv_First_Change_Upper_RUS
+ 000006B4  3C F0		    cmp al, 240
+ 000006B6  74 24		    je Text_Conv_First_Change_Upper_RUS
 
- 000006C1  3C 9F		    cmp al, rus_letter_ya_Upper
- 000006C3  77 02		    ja Text_Conv_First_Check3
- 000006C5  EB 1E		    jmp Text_Conv_First_Change_Upper_RUS
+ 000006B8  3C 9F		    cmp al, rus_letter_ya_Upper
+ 000006BA  77 02		    ja Text_Conv_First_Check3
+ 000006BC  EB 1E		    jmp Text_Conv_First_Change_Upper_RUS
 
- 000006C7			Text_Conv_First_Check3:
+ 000006BE			Text_Conv_First_Check3:
 
- 000006C7  3C AF		    cmp al, rus_letter_p_lower
- 000006C9  76 48		    jbe Text_Conv_First_Change_Lower_RUS
+ 000006BE  3C AF		    cmp al, rus_letter_p_lower
+ 000006C0  76 48		    jbe Text_Conv_First_Change_Lower_RUS
 				    
- 000006CB  3C E0		    cmp al, rus_letter_r_lower
- 000006CD  72 74		    jb Text_Conv_First_Skip
- 000006CF  EB 42		    jmp Text_Conv_First_Change_Lower_RUS
+ 000006C2  3C E0		    cmp al, rus_letter_r_lower
+ 000006C4  72 74		    jb Text_Conv_First_Skip
+ 000006C6  EB 42		    jmp Text_Conv_First_Change_Lower_RUS
 
 
- 000006D1			Text_Conv_First_Change_Upper_ENG:
- 000006D1  B0 5A		    mov al, 'Z'
- 000006D3  2A 03		    sub al, [ebx]      ;[ebx] = Z - [ebx] + A
- 000006D5  04 41		    add al, 'A'
- 000006D7  88 03		    mov [ebx], al
- 000006D9  EB 68		    jmp Text_Conv_First_Skip
+ 000006C8			Text_Conv_First_Change_Upper_ENG:
+ 000006C8  B0 5A		    mov al, 'Z'
+ 000006CA  2A 03		    sub al, [ebx]      ;[ebx] = Z - [ebx] + A
+ 000006CC  04 41		    add al, 'A'
+ 000006CE  88 03		    mov [ebx], al
+ 000006D0  EB 68		    jmp Text_Conv_First_Skip
 
- 000006DB			Text_Conv_First_Change_Lower_ENG:
- 000006DB  B0 7A		    mov al, 'z'
- 000006DD  2A 03		    sub al, [ebx]      ;[ebx] = z - [ebx] + a
- 000006DF  04 61		    add al, 'a'
- 000006E1  88 03		    mov [ebx], al
- 000006E3  EB 5E		    jmp Text_Conv_First_Skip
+ 000006D2			Text_Conv_First_Change_Lower_ENG:
+ 000006D2  B0 7A		    mov al, 'z'
+ 000006D4  2A 03		    sub al, [ebx]      ;[ebx] = z - [ebx] + a
+ 000006D6  04 61		    add al, 'a'
+ 000006D8  88 03		    mov [ebx], al
+ 000006DA  EB 5E		    jmp Text_Conv_First_Skip
 
 
 
- 000006E5			Text_Conv_First_Change_Upper_RUS:
- 000006E5  8A 03		    mov al, [ebx]
- 000006E7  3C F0		    cmp al, 240
- 000006E9  75 04		    jne F
- 000006EB  B0 99		    mov al, 153
- 000006ED  EB 54		    jmp Text_Conv_First_Skip
- 000006EF			F:
- 000006EF  3C 99		    cmp al, 153
- 000006F1  75 04		    jne F1
- 000006F3  B0 F0		    mov al, 240
- 000006F5  EB 4C		    jmp Text_Conv_First_Skip
- 000006F7			F1:
- 000006F7  3C 85		    cmp al, 133 ; сравниваем с Е
- 000006F9  77 02		    ja L  
- 000006FB  EB 0A		    jmp L2  
- 000006FD			L:
- 000006FD  3C 99		    cmp al, 153
- 000006FF  77 06		    ja L2      
- 00000701			L1:
- 00000701  88 03		    mov [ebx], al
- 00000703  B0 9E		    mov al, rus_letter_ya_Upper - 1
- 00000705  EB 04		    jmp Q
- 00000707			L2:
- 00000707  88 03		    mov [ebx], al
- 00000709  B0 9F		    mov al, rus_letter_ya_Upper
+ 000006DC			Text_Conv_First_Change_Upper_RUS:
+ 000006DC  8A 03		    mov al, [ebx]
+ 000006DE  3C F0		    cmp al, 240
+ 000006E0  75 04		    jne F
+ 000006E2  B0 99		    mov al, 153
+ 000006E4  EB 54		    jmp Text_Conv_First_Skip
+ 000006E6			F:
+ 000006E6  3C 99		    cmp al, 153
+ 000006E8  75 04		    jne F1
+ 000006EA  B0 F0		    mov al, 240
+ 000006EC  EB 4C		    jmp Text_Conv_First_Skip
+ 000006EE			F1:
+ 000006EE  3C 85		    cmp al, 133 ; сравниваем с Е
+ 000006F0  77 02		    ja L  
+ 000006F2  EB 0A		    jmp L2  
+ 000006F4			L:
+ 000006F4  3C 99		    cmp al, 153
+ 000006F6  77 06		    ja L2      
+ 000006F8			L1:
+ 000006F8  88 03		    mov [ebx], al
+ 000006FA  B0 9E		    mov al, rus_letter_ya_Upper - 1
+ 000006FC  EB 04		    jmp Q
+ 000006FE			L2:
+ 000006FE  88 03		    mov [ebx], al
+ 00000700  B0 9F		    mov al, rus_letter_ya_Upper
 
- 0000070B			Q:
- 0000070B  2A 03		    sub al, [ebx]      ; [ebx] = Я - [ebx] + А
- 0000070D  04 80		    add al, rus_letter_A_Upper
- 0000070F  88 03		    mov [ebx], al
- 00000711  EB 30		    jmp Text_Conv_First_Skip
+ 00000702			Q:
+ 00000702  2A 03		    sub al, [ebx]      ; [ebx] = Я - [ebx] + А
+ 00000704  04 80		    add al, rus_letter_A_Upper
+ 00000706  88 03		    mov [ebx], al
+ 00000708  EB 30		    jmp Text_Conv_First_Skip
 
- 00000713			Text_Conv_First_Change_Lower_RUS:
- 00000713  8A 03		    mov al, [ebx]
- 00000715  3C F1		    cmp al, 241
- 00000717  75 04		    jne M
- 00000719  B0 E9		    mov al, 233
- 0000071B  EB 26		    jmp Text_Conv_First_Skip
- 0000071D			M:
- 0000071D  3C E9		    cmp al, 233
- 0000071F  75 04		    jne M1
- 00000721  B0 F1		    mov al, 241
- 00000723  EB 1E		    jmp Text_Conv_First_Skip
- 00000725			M1:
- 00000725  3C A5		    cmp al, 165 ; сравниваем с е
- 00000727  77 02		    ja M2  
- 00000729  EB 0C		    jmp K2 
- 0000072B			M2:
- 0000072B  3C EA		    cmp al, 234 ; сравниваем с ъ
- 0000072D  73 08		    jae K2  
- 0000072F  EB 00		    jmp K1 
+ 0000070A			Text_Conv_First_Change_Lower_RUS:
+ 0000070A  8A 03		    mov al, [ebx]
+ 0000070C  3C F1		    cmp al, 241
+ 0000070E  75 04		    jne M
+ 00000710  B0 E9		    mov al, 233
+ 00000712  EB 26		    jmp Text_Conv_First_Skip
+ 00000714			M:
+ 00000714  3C E9		    cmp al, 233
+ 00000716  75 04		    jne M1
+ 00000718  B0 F1		    mov al, 241
+ 0000071A  EB 1E		    jmp Text_Conv_First_Skip
+ 0000071C			M1:
+ 0000071C  3C A5		    cmp al, 165 ; сравниваем с е
+ 0000071E  77 02		    ja M2  
+ 00000720  EB 0C		    jmp K2 
+ 00000722			M2:
+ 00000722  3C EA		    cmp al, 234 ; сравниваем с ъ
+ 00000724  73 08		    jae K2  
+ 00000726  EB 00		    jmp K1 
 				  
- 00000731			K1:
- 00000731  88 03		    mov [ebx], al
- 00000733  B0 FE		    mov al, 254
- 00000735  EB 04		    jmp Y
- 00000737			K2:
- 00000737  88 03		    mov [ebx], al
- 00000739  B0 FF		    mov al, 255
+ 00000728			K1:
+ 00000728  88 03		    mov [ebx], al
+ 0000072A  B0 FE		    mov al, 254
+ 0000072C  EB 04		    jmp Y
+ 0000072E			K2:
+ 0000072E  88 03		    mov [ebx], al
+ 00000730  B0 FF		    mov al, 255
 
- 0000073B			Y:
- 0000073B  2A 03		    sub al, [ebx]      
- 0000073D  04 90		    add al, 144
- 0000073F  88 03		    mov [ebx], al
- 00000741  EB 00		    jmp Text_Conv_First_Skip
+ 00000732			Y:
+ 00000732  2A 03		    sub al, [ebx]      
+ 00000734  04 90		    add al, 144
+ 00000736  88 03		    mov [ebx], al
+ 00000738  EB 00		    jmp Text_Conv_First_Skip
 
 
- 00000743			Text_Conv_First_Skip:
- 00000743  43			    inc ebx
- 00000744  E9 FFFFFF30		    jmp Text_Conv_First_Start
+ 0000073A			Text_Conv_First_Skip:
+ 0000073A  43			    inc ebx
+ 0000073B  E9 FFFFFF30		    jmp Text_Conv_First_Start
 
- 00000749			Text_Conv_First_End:
- 00000749  5D			    pop ebp
- 0000074A  C2 0004		    ret 4
+ 00000740			Text_Conv_First_End:
+ 00000740  5D			    pop ebp
+ 00000741  C2 0004		    ret 4
 
- 0000074D			Text_Conv_First endp
+ 00000744			Text_Conv_First endp
 
 				;Преобразование текста
 				;2) удвоить заглавную букву
 				;На вход подаётся адрес начала массива
 
- 0000074D			Text_Conv_Second proc
+ 00000744			Text_Conv_Second proc
 
- 0000074D  55			        push ebp
- 0000074E  8B EC		        mov ebp, esp
- 00000750  50			        push eax
- 00000751  53			        push ebx
- 00000752  51			        push ecx
- 00000753  52			        push edx
- 00000754  56			        push esi
+ 00000744  55			        push ebp
+ 00000745  8B EC		        mov ebp, esp
+ 00000747  50			        push eax
+ 00000748  53			        push ebx
+ 00000749  51			        push ecx
+ 0000074A  52			        push edx
+ 0000074B  56			        push esi
 
- 00000755  8B 5D 08		        mov ebx, [ebp + 8]
- 00000758  2B C0		        sub eax, eax
- 0000075A  2B D2		        sub edx, edx
+ 0000074C  8B 5D 08		        mov ebx, [ebp + 8]
+ 0000074F  2B C0		        sub eax, eax
+ 00000751  2B D2		        sub edx, edx
 
- 0000075C			Text_Conv_Second_Count_Len:
- 0000075C  2B C9		        sub ecx, ecx
- 0000075E  8B 0B		        mov ecx, [ebx]
- 00000760  43			        inc ebx
- 00000761  80 F9 00		        cmp cl, 0 ; проверяем на символ конца текста
- 00000764  74 04		        je Text_Conv_Second_Div
- 00000766  66| 40		        inc ax ;длина на ах
- 00000768  75 F2		        jne Text_Conv_Second_Count_Len
+ 00000753			Text_Conv_Second_Count_Len:
+ 00000753  2B C9		        sub ecx, ecx
+ 00000755  8B 0B		        mov ecx, [ebx]
+ 00000757  43			        inc ebx
+ 00000758  80 F9 00		        cmp cl, 0 ; проверяем на символ конца текста
+ 0000075B  74 04		        je Text_Conv_Second_Div
+ 0000075D  66| 40		        inc ax ;длина на ах
+ 0000075F  75 F2		        jne Text_Conv_Second_Count_Len
 
- 0000076A			Text_Conv_Second_Div:
+ 00000761			Text_Conv_Second_Div:
 
- 0000076A  66| 83 F8 01		        cmp ax, 1
- 0000076E  74 26		        je Text_Conv_Second_End
- 00000770  83 EB 02		        sub ebx, 2
- 00000773  2B F6		        sub esi, esi
- 00000775  8B F3		        mov esi, ebx ;сохраняем адрес конца массива
+ 00000761  66| 83 F8 01		        cmp ax, 1
+ 00000765  74 26		        je Text_Conv_Second_End
+ 00000767  83 EB 02		        sub ebx, 2
+ 0000076A  2B F6		        sub esi, esi
+ 0000076C  8B F3		        mov esi, ebx ;сохраняем адрес конца массива
+
+ 0000076E  2B C9		        sub ecx, ecx
+ 00000770  66| B9 0002		        mov cx, 2
+ 00000774  66| F7 F1		        div cx ;делим на 2
 
  00000777  2B C9		        sub ecx, ecx
- 00000779  66| B9 0002		        mov cx, 2
- 0000077D  66| F7 F1		        div cx ;делим на 2
+ 00000779  66| 8B C8		        mov cx, ax ; половина длины на сх
+ 0000077C  8B 5D 08		        mov ebx, [ebp + 8] ;адрес начала массива
 
- 00000780  2B C9		        sub ecx, ecx
- 00000782  66| 8B C8		        mov cx, ax ; половина длины на сх
- 00000785  8B 5D 08		        mov ebx, [ebp + 8] ;адрес начала массива
+ 0000077F			Text_Conv_Second_Make:
 
- 00000788			Text_Conv_Second_Make:
+ 0000077F  2B C0		        sub eax, eax
+ 00000781  8A 23		        mov ah, byte ptr [ebx] ; ah = Array[ebx]
+ 00000783  8A 06		        mov al, byte ptr [esi] ; al = Array[esi]
+ 00000785  88 26		        mov byte ptr [esi], ah ; Array[esi] := ah
+ 00000787  88 03		        mov byte ptr [ebx], al ; Array[ebx] = al
+ 00000789  43			        inc ebx
+ 0000078A  4E			        dec esi
 
- 00000788  2B C0		        sub eax, eax
- 0000078A  8A 23		        mov ah, byte ptr [ebx] ; ah = Array[ebx]
- 0000078C  8A 06		        mov al, byte ptr [esi] ; al = Array[esi]
- 0000078E  88 26		        mov byte ptr [esi], ah ; Array[esi] := ah
- 00000790  88 03		        mov byte ptr [ebx], al ; Array[ebx] = al
- 00000792  43			        inc ebx
- 00000793  4E			        dec esi
+ 0000078B  E2 F2		Loop Text_Conv_Second_Make
 
- 00000794  E2 F2		Loop Text_Conv_Second_Make
+ 0000078D			Text_Conv_Second_End:
+ 0000078D  5E			        pop esi
+ 0000078E  5A			        pop edx
+ 0000078F  59			        pop ecx
+ 00000790  5B			        pop ebx
+ 00000791  58			        pop eax
+ 00000792  5D			        pop ebp
+ 00000793  C2 0004		        ret 4
 
- 00000796			Text_Conv_Second_End:
- 00000796  5E			        pop esi
- 00000797  5A			        pop edx
- 00000798  59			        pop ecx
- 00000799  5B			        pop ebx
- 0000079A  58			        pop eax
- 0000079B  5D			        pop ebp
- 0000079C  C2 0004		        ret 4
+ 00000796			Text_Conv_Second endp
 
- 0000079F			Text_Conv_Second endp
+ 00000796			Start:
 
- 0000079F			Start:
-
- 0000079F			Input_First_Text:
+ 00000796			Input_First_Text:
 				    outstr ' Text 1: '
- 000007DD  68 00000019 R	    push offset Arr_1
- 000007E2  E8 FFFFF819		    call Array_Input
+ 000007D4  33 C0		    xor eax, eax 
+ 000007D6  68 00000019 R	    push offset Arr_1
+ 000007DB  E8 FFFFF820		    call Array_Input
 
- 000007E7  83 F8 00		    cmp eax, 0
- 000007EA  0F 84 0000095D	    je ProgramEndNotText
+ 000007E0  83 F8 00		    cmp eax, 0
+ 000007E3  0F 84 00000AE0	    je ProgramEndNotText
 
- 000007F0  50			    push eax
- 000007F1  66| 89 0D		    mov Arr_Len_1, cx
-	   00000915 R
- 000007F8  66| FF 35		    push Arr_Len_1
-	   00000915 R
- 000007FF  68 00000019 R	    push offset Arr_1
- 00000804  E8 FFFFFE0F		    call Array_Count_Len
- 00000809  66| A3		    mov Arr_Un_1, ax
-	   00000919 R
- 0000080F  58			    pop eax
- 00000810  83 F8 00		    cmp eax, 0
- 00000813  0F 85 000000AF	    jne Input_Second_Text
-				    outstrln 'Not text, exit'
- 000008C3  E9 0000092F		    jmp Program_End
+ 000007E9  68 00000019 R	    push offset Arr_1
+ 000007EE  E8 FFFFFE25		    call Array_Count_Length
+ 000007F3  66| A3		    mov Arr_Un_1, ax
+	   0000091D R
+				    outstr ' Length 1 = '
+				    outintln Arr_Un_1
+				    
 
- 000008C8			Input_Second_Text:
+ 000008C1			Input_Second_Text:
+				    newline
 				    outstr ' Text 2: '
 				    flush
 
- 00000923  33 C0		    xor eax, eax
- 00000925  68 00000417 R	    push offset Arr_2
- 0000092A  E8 FFFFF6D1		    call Array_Input
+ 00000988  33 C0		    xor eax, eax
+ 0000098A  68 00000419 R	    push offset Arr_2
+ 0000098F  E8 FFFFF66C		    call Array_Input
 
- 0000092F  83 F8 00		    cmp eax, 0
- 00000932  0F 84 00000815	    je ProgramEndNotText
+ 00000994  83 F8 00		    cmp eax, 0
+ 00000997  0F 84 0000092C	    je ProgramEndNotText
 
- 00000938  50			    push eax
- 00000939  66| 89 0D		    mov Arr_Len_2, cx
-	   00000917 R
- 00000940  66| FF 35		    push Arr_Len_2
-	   00000917 R
- 00000947  68 00000417 R	    push offset Arr_2
- 0000094C  E8 FFFFFCC7		    call Array_Count_Len
- 00000951  66| A3		    mov Arr_Un_2, ax
-	   0000091B R
- 00000957  58			    pop eax
- 00000958  83 F8 00		    cmp eax, 0
- 0000095B  0F 85 000000AF	    jne Conv_Case_1
-				    outstrln 'Not text, exit'
- 00000A0B  E9 000007E7		    jmp Program_End
-
- 00000A10			Conv_Case_1:
- 00000A10  33 C0		    xor eax, eax
- 00000A12  66| A1		    mov ax, Arr_Un_1
-	   00000919 R
- 00000A18  66| 3B 05		    cmp ax, Arr_Un_2
-	   0000091B R
-				    outstr ' Length 1 = '
-				    outintln Arr_Un_1
+ 0000099D  68 00000419 R	    push offset Arr_2
+ 000009A2  66| 8B 15		    mov dx, Arr_Un_1
+	   0000091D R
+ 000009A9  E8 FFFFFC6A		    call Array_Count_Length
+ 000009AE  66| 89 15		    mov Arr_Un_1, dx
+	   0000091D R
+ 000009B5  66| A3		    mov Arr_Un_2, ax
+	   0000091F R
 				    outstr ' Length 2 = '
 				    outintln Arr_Un_2
- 00000BAF  0F 82 00000217	    jb Conv_Case_2
+				    newline
+ 00000AEF  66| 33 D2		    xor dx, dx
+
+ 00000AF2			Conv_Case_1:
+ 00000AF2  66| A1		    mov ax, Arr_Un_1
+	   0000091D R
+ 00000AF8  66| 3B 05		    cmp ax, Arr_Un_2
+	   0000091F R
+ 00000AFF  0F 82 00000217	    jb Conv_Case_2
 				    outstrln ' Text 1 is longer or they are equal'
 				    outstrln ' Change letters to the symmetrical in Text 1'
 				    outstrln ' Reverse Text 2'
 				    
- 00000DB3  68 00000019 R	    push offset Arr_1
- 00000DB8  E8 FFFFF8B6		    call Text_Conv_First
- 00000DBD  68 00000417 R	    push offset Arr_2
- 00000DC2  E8 FFFFF986		    call Text_Conv_Second
+ 00000D03  68 00000019 R	    push offset Arr_1
+ 00000D08  E8 FFFFF95D		    call Text_Conv_First
+ 00000D0D  68 00000419 R	    push offset Arr_2
+ 00000D12  E8 FFFFFA2D		    call Text_Conv_Second
 				     
- 00000DC7  E9 00000214		    jmp Output
- 00000DCC			Conv_Case_2:
+ 00000D17  E9 00000214		    jmp Output
+ 00000D1C			Conv_Case_2:
 				    outstrln ' Text 2 is longer'
 				    outstrln ' Reverse Text 1'
 				    outstrln ' Change letters to the symmetrical in Text 2'
 				    
- 00000FCA  68 00000019 R	    push offset Arr_1
- 00000FCF  E8 FFFFF779		    call Text_Conv_Second
- 00000FD4  68 00000417 R	    push offset Arr_2
- 00000FD9  E8 FFFFF695		    call Text_Conv_First
- 00000FDE  EB 00		    jmp Output
+ 00000F1A  68 00000019 R	    push offset Arr_1
+ 00000F1F  E8 FFFFF820		    call Text_Conv_Second
+ 00000F24  68 00000419 R	    push offset Arr_2
+ 00000F29  E8 FFFFF73C		    call Text_Conv_First
+ 00000F2E  EB 00		    jmp Output
 
- 00000FE0			Output:
-				    outstrln ' Text 1 after conversion'
- 0000108A  68 00000019 R	    push offset Arr_1
- 0000108F  E8 FFFFF087		    call Array_Output
+ 00000F30			Output:
+				    newline
+				    outstrln ' Text 1 after conversion: '
+				    outstrln '"""'
+ 000010F0  68 00000019 R	    push offset Arr_1
+ 000010F5  E8 FFFFF021		    call Array_Output
 
-				    outstrln ' Text 2 after conversion'
- 0000113E  68 00000417 R	    push offset Arr_2
- 00001143  E8 FFFFEFD3		    call Array_Output
- 00001148  E9 000000AA		    jmp Program_End
+				    newline
+				    outstrln ' Text 2 after conversion:'
+				    outstrln '"""'
+ 000012BA  68 00000419 R	    push offset Arr_2
+ 000012BF  E8 FFFFEE57		    call Array_Output
+ 000012C4  E9 000000AA		    jmp Program_End
 
- 0000114D			ProgramEndNotText:
+ 000012C9			ProgramEndNotText:
 				    outstrln ' Error! Wrong Input'
 
- 000011F7			Program_End:
+ 00001373			Program_End:
 				    exit
 
 				end Start
-Microsoft (R) Macro Assembler Version 6.14.8444		    04/28/21 23:37:59
+Microsoft (R) Macro Assembler Version 6.14.8444		    04/29/21 00:12:34
 a.asm							     Symbols 2 - 1
 
 
@@ -710,20 +701,19 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00001D67 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00001203 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000209C Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000137F Para	  Public  'CODE'	
 
 
 Procedures,  parameters and locals:
 
                 N a m e                 Type     Value    Attr
 
-Array_Count_Len  . . . . . . . .	P Near	 00000618 _TEXT	Length= 0000005B Public STDCALL
-  Array_Count_Begin  . . . . . .	L Near	 00000628 _TEXT	
-  Array_Count_Next . . . . . . .	L Near	 00000638 _TEXT	
-  Array_Count_Symbols  . . . . .	L Near	 00000642 _TEXT	
-  Array_Count_Check  . . . . . .	L Near	 0000064D _TEXT	
-  Array_Count_Set_Zero . . . . .	L Near	 00000658 _TEXT	
+Array_Count_Length . . . . . . .	P Near	 00000618 _TEXT	Length= 00000052 Public STDCALL
+  Array_Count_Begin  . . . . . .	L Near	 0000062B _TEXT	
+  Array_Count_Max  . . . . . . .	L Near	 00000641 _TEXT	
+  Array_Count_Exit . . . . . . .	L Near	 0000064B _TEXT	
+  Array_Count_Set_Zero . . . . .	L Near	 00000655 _TEXT	
 Array_Input  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000011B Public STDCALL
   Array_Input_Begin  . . . . . .	L Near	 0000000E _TEXT	
   ??0002 . . . . . . . . . . . .	L Near	 00000019 _TEXT	
@@ -793,34 +783,34 @@ SetConsoleTitleA . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 Sleep  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 StdIn  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 StdOut . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-Text_Conv_First  . . . . . . . .	P Near	 00000673 _TEXT	Length= 000000DA Public STDCALL
-  Text_Conv_First_Start  . . . .	L Near	 00000679 _TEXT	
-  Text_Conv_First_Check1 . . . .	L Near	 0000069B _TEXT	
-  Text_Conv_First_Check2 . . . .	L Near	 000006A9 _TEXT	
-  Text_Conv_First_Check3 . . . .	L Near	 000006C7 _TEXT	
-  Text_Conv_First_Change_Upper_ENG .	L Near	 000006D1 _TEXT	
-  Text_Conv_First_Change_Lower_ENG .	L Near	 000006DB _TEXT	
-  Text_Conv_First_Change_Upper_RUS .	L Near	 000006E5 _TEXT	
-  F  . . . . . . . . . . . . . .	L Near	 000006EF _TEXT	
-  F1 . . . . . . . . . . . . . .	L Near	 000006F7 _TEXT	
-  L  . . . . . . . . . . . . . .	L Near	 000006FD _TEXT	
-  L1 . . . . . . . . . . . . . .	L Near	 00000701 _TEXT	
-  L2 . . . . . . . . . . . . . .	L Near	 00000707 _TEXT	
-  Q  . . . . . . . . . . . . . .	L Near	 0000070B _TEXT	
-  Text_Conv_First_Change_Lower_RUS .	L Near	 00000713 _TEXT	
-  M  . . . . . . . . . . . . . .	L Near	 0000071D _TEXT	
-  M1 . . . . . . . . . . . . . .	L Near	 00000725 _TEXT	
-  M2 . . . . . . . . . . . . . .	L Near	 0000072B _TEXT	
-  K1 . . . . . . . . . . . . . .	L Near	 00000731 _TEXT	
-  K2 . . . . . . . . . . . . . .	L Near	 00000737 _TEXT	
-  Y  . . . . . . . . . . . . . .	L Near	 0000073B _TEXT	
-  Text_Conv_First_Skip . . . . .	L Near	 00000743 _TEXT	
-  Text_Conv_First_End  . . . . .	L Near	 00000749 _TEXT	
-Text_Conv_Second . . . . . . . .	P Near	 0000074D _TEXT	Length= 00000052 Public STDCALL
-  Text_Conv_Second_Count_Len . .	L Near	 0000075C _TEXT	
-  Text_Conv_Second_Div . . . . .	L Near	 0000076A _TEXT	
-  Text_Conv_Second_Make  . . . .	L Near	 00000788 _TEXT	
-  Text_Conv_Second_End . . . . .	L Near	 00000796 _TEXT	
+Text_Conv_First  . . . . . . . .	P Near	 0000066A _TEXT	Length= 000000DA Public STDCALL
+  Text_Conv_First_Start  . . . .	L Near	 00000670 _TEXT	
+  Text_Conv_First_Check1 . . . .	L Near	 00000692 _TEXT	
+  Text_Conv_First_Check2 . . . .	L Near	 000006A0 _TEXT	
+  Text_Conv_First_Check3 . . . .	L Near	 000006BE _TEXT	
+  Text_Conv_First_Change_Upper_ENG .	L Near	 000006C8 _TEXT	
+  Text_Conv_First_Change_Lower_ENG .	L Near	 000006D2 _TEXT	
+  Text_Conv_First_Change_Upper_RUS .	L Near	 000006DC _TEXT	
+  F  . . . . . . . . . . . . . .	L Near	 000006E6 _TEXT	
+  F1 . . . . . . . . . . . . . .	L Near	 000006EE _TEXT	
+  L  . . . . . . . . . . . . . .	L Near	 000006F4 _TEXT	
+  L1 . . . . . . . . . . . . . .	L Near	 000006F8 _TEXT	
+  L2 . . . . . . . . . . . . . .	L Near	 000006FE _TEXT	
+  Q  . . . . . . . . . . . . . .	L Near	 00000702 _TEXT	
+  Text_Conv_First_Change_Lower_RUS .	L Near	 0000070A _TEXT	
+  M  . . . . . . . . . . . . . .	L Near	 00000714 _TEXT	
+  M1 . . . . . . . . . . . . . .	L Near	 0000071C _TEXT	
+  M2 . . . . . . . . . . . . . .	L Near	 00000722 _TEXT	
+  K1 . . . . . . . . . . . . . .	L Near	 00000728 _TEXT	
+  K2 . . . . . . . . . . . . . .	L Near	 0000072E _TEXT	
+  Y  . . . . . . . . . . . . . .	L Near	 00000732 _TEXT	
+  Text_Conv_First_Skip . . . . .	L Near	 0000073A _TEXT	
+  Text_Conv_First_End  . . . . .	L Near	 00000740 _TEXT	
+Text_Conv_Second . . . . . . . .	P Near	 00000744 _TEXT	Length= 00000052 Public STDCALL
+  Text_Conv_Second_Count_Len . .	L Near	 00000753 _TEXT	
+  Text_Conv_Second_Div . . . . .	L Near	 00000761 _TEXT	
+  Text_Conv_Second_Make  . . . .	L Near	 0000077F _TEXT	
+  Text_Conv_Second_End . . . . .	L Near	 0000078D _TEXT	
 URLDownloadToFileA . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 VirtualProtect . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 nrandom  . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
@@ -835,285 +825,321 @@ Symbols:
                 N a m e                 Type     Value    Attr
 
 ??0000 . . . . . . . . . . . . .	Number	 00000001h   
-??0001 . . . . . . . . . . . . .	Byte	 0000091D _DATA	
+??0001 . . . . . . . . . . . . .	Byte	 00000921 _DATA	
 ??0003 . . . . . . . . . . . . .	Number	 00000001h   
-??0004 . . . . . . . . . . . . .	Byte	 0000091F _DATA	
+??0004 . . . . . . . . . . . . .	Byte	 00000923 _DATA	
 ??0006 . . . . . . . . . . . . .	Number	 00000001h   
-??0007 . . . . . . . . . . . . .	Byte	 00000921 _DATA	
-??0009 . . . . . . . . . . . . .	Byte	 00000928 _DATA	
-??000A . . . . . . . . . . . . .	Byte	 00000924 _DATA	
+??0007 . . . . . . . . . . . . .	Byte	 00000925 _DATA	
+??0009 . . . . . . . . . . . . .	Byte	 0000092C _DATA	
+??000A . . . . . . . . . . . . .	Byte	 00000928 _DATA	
 ??000B . . . . . . . . . . . . .	Text   	 "
-??000C . . . . . . . . . . . . .	Byte	 00000923 _DATA	
-??000F . . . . . . . . . . . . .	Byte	 0000092B _DATA	
+??000C . . . . . . . . . . . . .	Byte	 00000927 _DATA	
+??000F . . . . . . . . . . . . .	Byte	 0000092F _DATA	
 ??0010 . . . . . . . . . . . . .	Number	 00000000h   
-??0011 . . . . . . . . . . . . .	Byte	 0000092E _DATA	
-??0013 . . . . . . . . . . . . .	Byte	 000009F9 _DATA	
-??0014 . . . . . . . . . . . . .	Byte	 00000931 _DATA	
+??0011 . . . . . . . . . . . . .	Byte	 00000932 _DATA	
+??0013 . . . . . . . . . . . . .	Byte	 000009FD _DATA	
+??0014 . . . . . . . . . . . . .	Byte	 00000935 _DATA	
 ??0015 . . . . . . . . . . . . .	Text   	 o
-??0016 . . . . . . . . . . . . .	Byte	 00000930 _DATA	
+??0016 . . . . . . . . . . . . .	Byte	 00000934 _DATA	
 ??0019 . . . . . . . . . . . . .	Number	 00000001h   
-??001A . . . . . . . . . . . . .	Byte	 000009FC _DATA	
-??001C . . . . . . . . . . . . .	Byte	 00000AC7 _DATA	
-??001D . . . . . . . . . . . . .	Byte	 000009FF _DATA	
+??001A . . . . . . . . . . . . .	Byte	 00000A00 _DATA	
+??001C . . . . . . . . . . . . .	Byte	 00000ACB _DATA	
+??001D . . . . . . . . . . . . .	Byte	 00000A03 _DATA	
 ??001E . . . . . . . . . . . . .	Text   	 o
-??001F . . . . . . . . . . . . .	Byte	 000009FE _DATA	
+??001F . . . . . . . . . . . . .	Byte	 00000A02 _DATA	
 ??0022 . . . . . . . . . . . . .	Number	 00000000h   
-??0023 . . . . . . . . . . . . .	Byte	 00000ACA _DATA	
-??0025 . . . . . . . . . . . . .	Byte	 00000B95 _DATA	
-??0026 . . . . . . . . . . . . .	Byte	 00000ACD _DATA	
+??0023 . . . . . . . . . . . . .	Byte	 00000ACE _DATA	
+??0025 . . . . . . . . . . . . .	Byte	 00000B99 _DATA	
+??0026 . . . . . . . . . . . . .	Byte	 00000AD1 _DATA	
 ??0027 . . . . . . . . . . . . .	Text   	 o
-??0028 . . . . . . . . . . . . .	Byte	 00000ACC _DATA	
+??0028 . . . . . . . . . . . . .	Byte	 00000AD0 _DATA	
 ??002B . . . . . . . . . . . . .	Number	 00000000h   
-??002C . . . . . . . . . . . . .	Byte	 00000B98 _DATA	
-??002E . . . . . . . . . . . . .	Byte	 00000C63 _DATA	
-??002F . . . . . . . . . . . . .	Byte	 00000B9B _DATA	
+??002C . . . . . . . . . . . . .	Byte	 00000B9C _DATA	
+??002E . . . . . . . . . . . . .	Byte	 00000C67 _DATA	
+??002F . . . . . . . . . . . . .	Byte	 00000B9F _DATA	
 ??0030 . . . . . . . . . . . . .	Text   	 o
-??0031 . . . . . . . . . . . . .	Byte	 00000B9A _DATA	
+??0031 . . . . . . . . . . . . .	Byte	 00000B9E _DATA	
 ??0034 . . . . . . . . . . . . .	Number	 00000000h   
-??0035 . . . . . . . . . . . . .	Byte	 00000C66 _DATA	
-??0037 . . . . . . . . . . . . .	Byte	 00000D31 _DATA	
-??0038 . . . . . . . . . . . . .	Byte	 00000C69 _DATA	
+??0035 . . . . . . . . . . . . .	Byte	 00000C6A _DATA	
+??0037 . . . . . . . . . . . . .	Byte	 00000D35 _DATA	
+??0038 . . . . . . . . . . . . .	Byte	 00000C6D _DATA	
 ??0039 . . . . . . . . . . . . .	Text   	 o
-??003A . . . . . . . . . . . . .	Byte	 00000C68 _DATA	
+??003A . . . . . . . . . . . . .	Byte	 00000C6C _DATA	
 ??003D . . . . . . . . . . . . .	Number	 00000000h   
-??003E . . . . . . . . . . . . .	Byte	 00000D34 _DATA	
-??0040 . . . . . . . . . . . . .	Byte	 00000DFF _DATA	
-??0041 . . . . . . . . . . . . .	Byte	 00000D37 _DATA	
+??003E . . . . . . . . . . . . .	Byte	 00000D38 _DATA	
+??0040 . . . . . . . . . . . . .	Byte	 00000E03 _DATA	
+??0041 . . . . . . . . . . . . .	Byte	 00000D3B _DATA	
 ??0042 . . . . . . . . . . . . .	Text   	 o
-??0043 . . . . . . . . . . . . .	Byte	 00000D36 _DATA	
+??0043 . . . . . . . . . . . . .	Byte	 00000D3A _DATA	
 ??0046 . . . . . . . . . . . . .	Number	 00000000h   
-??0047 . . . . . . . . . . . . .	Byte	 00000E02 _DATA	
-??0049 . . . . . . . . . . . . .	Byte	 00000ECD _DATA	
-??004A . . . . . . . . . . . . .	Byte	 00000E05 _DATA	
+??0047 . . . . . . . . . . . . .	Byte	 00000E06 _DATA	
+??0049 . . . . . . . . . . . . .	Byte	 00000ED1 _DATA	
+??004A . . . . . . . . . . . . .	Byte	 00000E09 _DATA	
 ??004B . . . . . . . . . . . . .	Text   	 o
-??004C . . . . . . . . . . . . .	Byte	 00000E04 _DATA	
+??004C . . . . . . . . . . . . .	Byte	 00000E08 _DATA	
 ??004F . . . . . . . . . . . . .	Number	 00000000h   
-??0050 . . . . . . . . . . . . .	Byte	 00000ED0 _DATA	
-??0052 . . . . . . . . . . . . .	Byte	 00000F9B _DATA	
-??0053 . . . . . . . . . . . . .	Byte	 00000ED3 _DATA	
+??0050 . . . . . . . . . . . . .	Byte	 00000ED4 _DATA	
+??0052 . . . . . . . . . . . . .	Byte	 00000F9F _DATA	
+??0053 . . . . . . . . . . . . .	Byte	 00000ED7 _DATA	
 ??0054 . . . . . . . . . . . . .	Text   	 o
-??0055 . . . . . . . . . . . . .	Byte	 00000ED2 _DATA	
+??0055 . . . . . . . . . . . . .	Byte	 00000ED6 _DATA	
 ??0058 . . . . . . . . . . . . .	Number	 00000000h   
-??0059 . . . . . . . . . . . . .	Byte	 00000F9E _DATA	
-??005B . . . . . . . . . . . . .	Byte	 00001069 _DATA	
-??005C . . . . . . . . . . . . .	Byte	 00000FA1 _DATA	
+??0059 . . . . . . . . . . . . .	Byte	 00000FA2 _DATA	
+??005B . . . . . . . . . . . . .	Byte	 0000106D _DATA	
+??005C . . . . . . . . . . . . .	Byte	 00000FA5 _DATA	
 ??005D . . . . . . . . . . . . .	Text   	 o
-??005E . . . . . . . . . . . . .	Byte	 00000FA0 _DATA	
-??0061 . . . . . . . . . . . . .	Byte	 00001071 _DATA	
-??0062 . . . . . . . . . . . . .	Byte	 0000106D _DATA	
+??005E . . . . . . . . . . . . .	Byte	 00000FA4 _DATA	
+??0061 . . . . . . . . . . . . .	Byte	 00001075 _DATA	
+??0062 . . . . . . . . . . . . .	Byte	 00001071 _DATA	
 ??0063 . . . . . . . . . . . . .	Text   	 "
-??0064 . . . . . . . . . . . . .	Byte	 0000106C _DATA	
-??0067 . . . . . . . . . . . . .	Byte	 00001074 _DATA	
+??0064 . . . . . . . . . . . . .	Byte	 00001070 _DATA	
+??0067 . . . . . . . . . . . . .	Byte	 00001078 _DATA	
 ??0068 . . . . . . . . . . . . .	Number	 00000000h   
-??0069 . . . . . . . . . . . . .	Byte	 00001077 _DATA	
-??006B . . . . . . . . . . . . .	Byte	 00001142 _DATA	
-??006C . . . . . . . . . . . . .	Byte	 0000107A _DATA	
+??0069 . . . . . . . . . . . . .	Byte	 0000107B _DATA	
+??006B . . . . . . . . . . . . .	Byte	 00001146 _DATA	
+??006C . . . . . . . . . . . . .	Byte	 0000107E _DATA	
 ??006D . . . . . . . . . . . . .	Text   	 o
-??006E . . . . . . . . . . . . .	Byte	 00001079 _DATA	
-??0071 . . . . . . . . . . . . .	Byte	 00001150 _DATA	
-??0072 . . . . . . . . . . . . .	Byte	 00001146 _DATA	
+??006E . . . . . . . . . . . . .	Byte	 0000107D _DATA	
+??0071 . . . . . . . . . . . . .	Byte	 00001154 _DATA	
+??0072 . . . . . . . . . . . . .	Byte	 0000114A _DATA	
 ??0073 . . . . . . . . . . . . .	Text   	 "
-??0074 . . . . . . . . . . . . .	Byte	 00001145 _DATA	
-??0076 . . . . . . . . . . . . .	L Near	 000007CA _TEXT	
-??0077 . . . . . . . . . . . . .	Byte	 00001163 _DATA	
-??0078 . . . . . . . . . . . . .	Byte	 00001154 _DATA	
+??0074 . . . . . . . . . . . . .	Byte	 00001149 _DATA	
+??0076 . . . . . . . . . . . . .	L Near	 000007C1 _TEXT	
+??0077 . . . . . . . . . . . . .	Byte	 00001165 _DATA	
+??0078 . . . . . . . . . . . . .	Byte	 00001158 _DATA	
 ??0079 . . . . . . . . . . . . .	Text   	 "
-??007A . . . . . . . . . . . . .	Byte	 00001153 _DATA	
-??007C . . . . . . . . . . . . .	L Near	 00000844 _TEXT	
-??007D . . . . . . . . . . . . .	Byte	 00001166 _DATA	
-??007E . . . . . . . . . . . . .	Number	 00000000h   
-??007F . . . . . . . . . . . . .	Byte	 00001169 _DATA	
-??0081 . . . . . . . . . . . . .	Byte	 00001234 _DATA	
-??0082 . . . . . . . . . . . . .	Byte	 0000116C _DATA	
-??0083 . . . . . . . . . . . . .	Text   	 o
-??0084 . . . . . . . . . . . . .	Byte	 0000116B _DATA	
-??0085 . . . . . . . . . . . . .	L Near	 00000876 _TEXT	
-??0086 . . . . . . . . . . . . .	L Near	 000008AC _TEXT	
-??0087 . . . . . . . . . . . . .	Byte	 00001242 _DATA	
-??0088 . . . . . . . . . . . . .	Byte	 00001238 _DATA	
-??0089 . . . . . . . . . . . . .	Text   	 "
-??008A . . . . . . . . . . . . .	Byte	 00001237 _DATA	
-??008C . . . . . . . . . . . . .	L Near	 000008F3 _TEXT	
-??008D . . . . . . . . . . . . .	Byte	 00001245 _DATA	
-??008E . . . . . . . . . . . . .	L Near	 0000090A _TEXT	
-??008F . . . . . . . . . . . . .	Byte	 00001256 _DATA	
-??0090 . . . . . . . . . . . . .	Byte	 00001247 _DATA	
-??0091 . . . . . . . . . . . . .	Text   	 "
-??0092 . . . . . . . . . . . . .	Byte	 00001246 _DATA	
-??0094 . . . . . . . . . . . . .	L Near	 0000098C _TEXT	
-??0095 . . . . . . . . . . . . .	Byte	 00001259 _DATA	
-??0096 . . . . . . . . . . . . .	Number	 00000000h   
-??0097 . . . . . . . . . . . . .	Byte	 0000125C _DATA	
-??0099 . . . . . . . . . . . . .	Byte	 00001327 _DATA	
-??009A . . . . . . . . . . . . .	Byte	 0000125F _DATA	
-??009B . . . . . . . . . . . . .	Text   	 o
-??009C . . . . . . . . . . . . .	Byte	 0000125E _DATA	
-??009D . . . . . . . . . . . . .	L Near	 000009BE _TEXT	
-??009E . . . . . . . . . . . . .	L Near	 000009F4 _TEXT	
-??009F . . . . . . . . . . . . .	Byte	 00001338 _DATA	
-??00A0 . . . . . . . . . . . . .	Byte	 0000132B _DATA	
-??00A1 . . . . . . . . . . . . .	Text   	 "
-??00A2 . . . . . . . . . . . . .	Byte	 0000132A _DATA	
-??00A4 . . . . . . . . . . . . .	L Near	 00000A4A _TEXT	
-??00A5 . . . . . . . . . . . . .	Number	 00000006h   
-??00A6 . . . . . . . . . . . . .	Number	 00000007h   
-??00A7 . . . . . . . . . . . . .	Number	 00000000h   
-??00A8 . . . . . . . . . . . . .	Byte	 0000133B _DATA	
-??00B0 . . . . . . . . . . . . .	Number	 00000002h   
-??00B2 . . . . . . . . . . . . .	Byte	 0000133E _DATA	
-??00B3 . . . . . . . . . . . . .	Number	 00000000h   
-??00B4 . . . . . . . . . . . . .	Byte	 00001341 _DATA	
-??00B6 . . . . . . . . . . . . .	Byte	 0000140C _DATA	
-??00B7 . . . . . . . . . . . . .	Byte	 00001344 _DATA	
-??00B8 . . . . . . . . . . . . .	Text   	 o
-??00B9 . . . . . . . . . . . . .	Byte	 00001343 _DATA	
-??00BA . . . . . . . . . . . . .	L Near	 00000A9A _TEXT	
-??00BB . . . . . . . . . . . . .	L Near	 00000AD0 _TEXT	
-??00BC . . . . . . . . . . . . .	Byte	 0000141D _DATA	
-??00BD . . . . . . . . . . . . .	Byte	 00001410 _DATA	
-??00BE . . . . . . . . . . . . .	Text   	 "
-??00BF . . . . . . . . . . . . .	Byte	 0000140F _DATA	
-??00C1 . . . . . . . . . . . . .	L Near	 00000B12 _TEXT	
-??00C2 . . . . . . . . . . . . .	Number	 00000006h   
-??00C3 . . . . . . . . . . . . .	Number	 00000007h   
+??007A . . . . . . . . . . . . .	Byte	 00001157 _DATA	
+??007C . . . . . . . . . . . . .	L Near	 00000824 _TEXT	
+??007D . . . . . . . . . . . . .	Number	 00000006h   
+??007E . . . . . . . . . . . . .	Number	 00000007h   
+??007F . . . . . . . . . . . . .	Number	 00000000h   
+??0080 . . . . . . . . . . . . .	Byte	 00001168 _DATA	
+??0088 . . . . . . . . . . . . .	Number	 00000002h   
+??008A . . . . . . . . . . . . .	Byte	 0000116B _DATA	
+??008B . . . . . . . . . . . . .	Number	 00000000h   
+??008C . . . . . . . . . . . . .	Byte	 0000116E _DATA	
+??008E . . . . . . . . . . . . .	Byte	 00001239 _DATA	
+??008F . . . . . . . . . . . . .	Byte	 00001171 _DATA	
+??0090 . . . . . . . . . . . . .	Text   	 o
+??0091 . . . . . . . . . . . . .	Byte	 00001170 _DATA	
+??0092 . . . . . . . . . . . . .	L Near	 00000874 _TEXT	
+??0093 . . . . . . . . . . . . .	L Near	 000008AA _TEXT	
+??0094 . . . . . . . . . . . . .	Byte	 0000123C _DATA	
+??0095 . . . . . . . . . . . . .	Number	 00000000h   
+??0096 . . . . . . . . . . . . .	Byte	 0000123F _DATA	
+??0098 . . . . . . . . . . . . .	Byte	 0000130A _DATA	
+??0099 . . . . . . . . . . . . .	Byte	 00001242 _DATA	
+??009A . . . . . . . . . . . . .	Text   	 o
+??009B . . . . . . . . . . . . .	Byte	 00001241 _DATA	
+??009C . . . . . . . . . . . . .	L Near	 000008E0 _TEXT	
+??009D . . . . . . . . . . . . .	L Near	 00000916 _TEXT	
+??009E . . . . . . . . . . . . .	Byte	 00001318 _DATA	
+??009F . . . . . . . . . . . . .	Byte	 0000130E _DATA	
+??00A0 . . . . . . . . . . . . .	Text   	 "
+??00A1 . . . . . . . . . . . . .	Byte	 0000130D _DATA	
+??00A3 . . . . . . . . . . . . .	L Near	 00000958 _TEXT	
+??00A4 . . . . . . . . . . . . .	Byte	 0000131B _DATA	
+??00A5 . . . . . . . . . . . . .	L Near	 0000096F _TEXT	
+??00A6 . . . . . . . . . . . . .	Byte	 0000132A _DATA	
+??00A7 . . . . . . . . . . . . .	Byte	 0000131D _DATA	
+??00A8 . . . . . . . . . . . . .	Text   	 "
+??00A9 . . . . . . . . . . . . .	Byte	 0000131C _DATA	
+??00AB . . . . . . . . . . . . .	L Near	 000009E6 _TEXT	
+??00AC . . . . . . . . . . . . .	Number	 00000006h   
+??00AD . . . . . . . . . . . . .	Number	 00000007h   
+??00AE . . . . . . . . . . . . .	Number	 00000000h   
+??00AF . . . . . . . . . . . . .	Byte	 0000132D _DATA	
+??00B7 . . . . . . . . . . . . .	Number	 00000002h   
+??00B9 . . . . . . . . . . . . .	Byte	 00001330 _DATA	
+??00BA . . . . . . . . . . . . .	Number	 00000000h   
+??00BB . . . . . . . . . . . . .	Byte	 00001333 _DATA	
+??00BD . . . . . . . . . . . . .	Byte	 000013FE _DATA	
+??00BE . . . . . . . . . . . . .	Byte	 00001336 _DATA	
+??00BF . . . . . . . . . . . . .	Text   	 o
+??00C0 . . . . . . . . . . . . .	Byte	 00001335 _DATA	
+??00C1 . . . . . . . . . . . . .	L Near	 00000A36 _TEXT	
+??00C2 . . . . . . . . . . . . .	L Near	 00000A6C _TEXT	
+??00C3 . . . . . . . . . . . . .	Byte	 00001401 _DATA	
 ??00C4 . . . . . . . . . . . . .	Number	 00000000h   
-??00C5 . . . . . . . . . . . . .	Byte	 00001420 _DATA	
-??00CD . . . . . . . . . . . . .	Number	 00000002h   
-??00CF . . . . . . . . . . . . .	Byte	 00001423 _DATA	
-??00D0 . . . . . . . . . . . . .	Number	 00000000h   
-??00D1 . . . . . . . . . . . . .	Byte	 00001426 _DATA	
-??00D3 . . . . . . . . . . . . .	Byte	 000014F1 _DATA	
-??00D4 . . . . . . . . . . . . .	Byte	 00001429 _DATA	
-??00D5 . . . . . . . . . . . . .	Text   	 o
-??00D6 . . . . . . . . . . . . .	Byte	 00001428 _DATA	
-??00D7 . . . . . . . . . . . . .	L Near	 00000B62 _TEXT	
-??00D8 . . . . . . . . . . . . .	L Near	 00000B98 _TEXT	
-??00D9 . . . . . . . . . . . . .	Byte	 00001519 _DATA	
-??00DA . . . . . . . . . . . . .	Byte	 000014F5 _DATA	
-??00DB . . . . . . . . . . . . .	Text   	 "
-??00DC . . . . . . . . . . . . .	Byte	 000014F4 _DATA	
-??00DE . . . . . . . . . . . . .	L Near	 00000BE0 _TEXT	
-??00DF . . . . . . . . . . . . .	Byte	 0000151C _DATA	
-??00E0 . . . . . . . . . . . . .	Number	 00000000h   
-??00E1 . . . . . . . . . . . . .	Byte	 0000151F _DATA	
-??00E3 . . . . . . . . . . . . .	Byte	 000015EA _DATA	
-??00E4 . . . . . . . . . . . . .	Byte	 00001522 _DATA	
-??00E5 . . . . . . . . . . . . .	Text   	 o
-??00E6 . . . . . . . . . . . . .	Byte	 00001521 _DATA	
-??00E7 . . . . . . . . . . . . .	L Near	 00000C12 _TEXT	
-??00E8 . . . . . . . . . . . . .	L Near	 00000C48 _TEXT	
-??00E9 . . . . . . . . . . . . .	Byte	 0000161B _DATA	
-??00EA . . . . . . . . . . . . .	Byte	 000015EE _DATA	
-??00EB . . . . . . . . . . . . .	Text   	 "
-??00EC . . . . . . . . . . . . .	Byte	 000015ED _DATA	
-??00EE . . . . . . . . . . . . .	L Near	 00000C8A _TEXT	
-??00EF . . . . . . . . . . . . .	Byte	 0000161E _DATA	
-??00F0 . . . . . . . . . . . . .	Number	 00000000h   
-??00F1 . . . . . . . . . . . . .	Byte	 00001621 _DATA	
-??00F3 . . . . . . . . . . . . .	Byte	 000016EC _DATA	
-??00F4 . . . . . . . . . . . . .	Byte	 00001624 _DATA	
-??00F5 . . . . . . . . . . . . .	Text   	 o
-??00F6 . . . . . . . . . . . . .	Byte	 00001623 _DATA	
-??00F7 . . . . . . . . . . . . .	L Near	 00000CBC _TEXT	
-??00F8 . . . . . . . . . . . . .	L Near	 00000CF2 _TEXT	
-??00F9 . . . . . . . . . . . . .	Byte	 00001700 _DATA	
-??00FA . . . . . . . . . . . . .	Byte	 000016F0 _DATA	
-??00FB . . . . . . . . . . . . .	Text   	 "
-??00FC . . . . . . . . . . . . .	Byte	 000016EF _DATA	
-??00FE . . . . . . . . . . . . .	L Near	 00000D34 _TEXT	
-??00FF . . . . . . . . . . . . .	Byte	 00001703 _DATA	
-??0100 . . . . . . . . . . . . .	Number	 00000000h   
-??0101 . . . . . . . . . . . . .	Byte	 00001706 _DATA	
-??0103 . . . . . . . . . . . . .	Byte	 000017D1 _DATA	
-??0104 . . . . . . . . . . . . .	Byte	 00001709 _DATA	
-??0105 . . . . . . . . . . . . .	Text   	 o
-??0106 . . . . . . . . . . . . .	Byte	 00001708 _DATA	
-??0107 . . . . . . . . . . . . .	L Near	 00000D66 _TEXT	
-??0108 . . . . . . . . . . . . .	L Near	 00000D9C _TEXT	
-??0109 . . . . . . . . . . . . .	Byte	 000017E7 _DATA	
-??010A . . . . . . . . . . . . .	Byte	 000017D5 _DATA	
-??010B . . . . . . . . . . . . .	Text   	 "
-??010C . . . . . . . . . . . . .	Byte	 000017D4 _DATA	
-??010E . . . . . . . . . . . . .	L Near	 00000DF7 _TEXT	
-??010F . . . . . . . . . . . . .	Byte	 000017EA _DATA	
-??0110 . . . . . . . . . . . . .	Number	 00000000h   
-??0111 . . . . . . . . . . . . .	Byte	 000017ED _DATA	
-??0113 . . . . . . . . . . . . .	Byte	 000018B8 _DATA	
-??0114 . . . . . . . . . . . . .	Byte	 000017F0 _DATA	
-??0115 . . . . . . . . . . . . .	Text   	 o
-??0116 . . . . . . . . . . . . .	Byte	 000017EF _DATA	
-??0117 . . . . . . . . . . . . .	L Near	 00000E29 _TEXT	
-??0118 . . . . . . . . . . . . .	L Near	 00000E5F _TEXT	
-??0119 . . . . . . . . . . . . .	Byte	 000018CC _DATA	
-??011A . . . . . . . . . . . . .	Byte	 000018BC _DATA	
-??011B . . . . . . . . . . . . .	Text   	 "
-??011C . . . . . . . . . . . . .	Byte	 000018BB _DATA	
-??011E . . . . . . . . . . . . .	L Near	 00000EA1 _TEXT	
-??011F . . . . . . . . . . . . .	Byte	 000018CF _DATA	
-??0120 . . . . . . . . . . . . .	Number	 00000000h   
-??0121 . . . . . . . . . . . . .	Byte	 000018D2 _DATA	
-??0123 . . . . . . . . . . . . .	Byte	 0000199D _DATA	
-??0124 . . . . . . . . . . . . .	Byte	 000018D5 _DATA	
-??0125 . . . . . . . . . . . . .	Text   	 o
-??0126 . . . . . . . . . . . . .	Byte	 000018D4 _DATA	
-??0127 . . . . . . . . . . . . .	L Near	 00000ED3 _TEXT	
-??0128 . . . . . . . . . . . . .	L Near	 00000F09 _TEXT	
-??0129 . . . . . . . . . . . . .	Byte	 000019CE _DATA	
-??012A . . . . . . . . . . . . .	Byte	 000019A1 _DATA	
-??012B . . . . . . . . . . . . .	Text   	 "
-??012C . . . . . . . . . . . . .	Byte	 000019A0 _DATA	
-??012E . . . . . . . . . . . . .	L Near	 00000F4B _TEXT	
-??012F . . . . . . . . . . . . .	Byte	 000019D1 _DATA	
-??0130 . . . . . . . . . . . . .	Number	 00000000h   
-??0131 . . . . . . . . . . . . .	Byte	 000019D4 _DATA	
-??0133 . . . . . . . . . . . . .	Byte	 00001A9F _DATA	
-??0134 . . . . . . . . . . . . .	Byte	 000019D7 _DATA	
-??0135 . . . . . . . . . . . . .	Text   	 o
-??0136 . . . . . . . . . . . . .	Byte	 000019D6 _DATA	
-??0137 . . . . . . . . . . . . .	L Near	 00000F7D _TEXT	
-??0138 . . . . . . . . . . . . .	L Near	 00000FB3 _TEXT	
-??0139 . . . . . . . . . . . . .	Byte	 00001ABC _DATA	
-??013A . . . . . . . . . . . . .	Byte	 00001AA3 _DATA	
-??013B . . . . . . . . . . . . .	Text   	 "
-??013C . . . . . . . . . . . . .	Byte	 00001AA2 _DATA	
-??013E . . . . . . . . . . . . .	L Near	 0000100B _TEXT	
-??013F . . . . . . . . . . . . .	Byte	 00001ABF _DATA	
-??0140 . . . . . . . . . . . . .	Number	 00000000h   
-??0141 . . . . . . . . . . . . .	Byte	 00001AC2 _DATA	
-??0143 . . . . . . . . . . . . .	Byte	 00001B8D _DATA	
-??0144 . . . . . . . . . . . . .	Byte	 00001AC5 _DATA	
-??0145 . . . . . . . . . . . . .	Text   	 o
-??0146 . . . . . . . . . . . . .	Byte	 00001AC4 _DATA	
-??0147 . . . . . . . . . . . . .	L Near	 0000103D _TEXT	
-??0148 . . . . . . . . . . . . .	L Near	 00001073 _TEXT	
-??0149 . . . . . . . . . . . . .	Byte	 00001BAA _DATA	
-??014A . . . . . . . . . . . . .	Byte	 00001B91 _DATA	
-??014B . . . . . . . . . . . . .	Text   	 "
-??014C . . . . . . . . . . . . .	Byte	 00001B90 _DATA	
-??014E . . . . . . . . . . . . .	L Near	 000010BF _TEXT	
-??014F . . . . . . . . . . . . .	Byte	 00001BAD _DATA	
-??0150 . . . . . . . . . . . . .	Number	 00000000h   
-??0151 . . . . . . . . . . . . .	Byte	 00001BB0 _DATA	
-??0153 . . . . . . . . . . . . .	Byte	 00001C7B _DATA	
-??0154 . . . . . . . . . . . . .	Byte	 00001BB3 _DATA	
-??0155 . . . . . . . . . . . . .	Text   	 o
-??0156 . . . . . . . . . . . . .	Byte	 00001BB2 _DATA	
-??0157 . . . . . . . . . . . . .	L Near	 000010F1 _TEXT	
-??0158 . . . . . . . . . . . . .	L Near	 00001127 _TEXT	
-??0159 . . . . . . . . . . . . .	Byte	 00001C93 _DATA	
-??015A . . . . . . . . . . . . .	Byte	 00001C7F _DATA	
-??015B . . . . . . . . . . . . .	Text   	 "
-??015C . . . . . . . . . . . . .	Byte	 00001C7E _DATA	
-??015E . . . . . . . . . . . . .	L Near	 00001178 _TEXT	
-??015F . . . . . . . . . . . . .	Byte	 00001C96 _DATA	
-??0160 . . . . . . . . . . . . .	Number	 00000000h   
-??0161 . . . . . . . . . . . . .	Byte	 00001C99 _DATA	
-??0163 . . . . . . . . . . . . .	Byte	 00001D64 _DATA	
-??0164 . . . . . . . . . . . . .	Byte	 00001C9C _DATA	
-??0165 . . . . . . . . . . . . .	Text   	 o
-??0166 . . . . . . . . . . . . .	Byte	 00001C9B _DATA	
-??0167 . . . . . . . . . . . . .	L Near	 000011AA _TEXT	
-??0168 . . . . . . . . . . . . .	L Near	 000011E0 _TEXT	
+??00C5 . . . . . . . . . . . . .	Byte	 00001404 _DATA	
+??00C7 . . . . . . . . . . . . .	Byte	 000014CF _DATA	
+??00C8 . . . . . . . . . . . . .	Byte	 00001407 _DATA	
+??00C9 . . . . . . . . . . . . .	Text   	 o
+??00CA . . . . . . . . . . . . .	Byte	 00001406 _DATA	
+??00CB . . . . . . . . . . . . .	L Near	 00000AA2 _TEXT	
+??00CC . . . . . . . . . . . . .	L Near	 00000AD8 _TEXT	
+??00CD . . . . . . . . . . . . .	Byte	 000014F7 _DATA	
+??00CE . . . . . . . . . . . . .	Byte	 000014D3 _DATA	
+??00CF . . . . . . . . . . . . .	Text   	 "
+??00D0 . . . . . . . . . . . . .	Byte	 000014D2 _DATA	
+??00D2 . . . . . . . . . . . . .	L Near	 00000B30 _TEXT	
+??00D3 . . . . . . . . . . . . .	Byte	 000014FA _DATA	
+??00D4 . . . . . . . . . . . . .	Number	 00000000h   
+??00D5 . . . . . . . . . . . . .	Byte	 000014FD _DATA	
+??00D7 . . . . . . . . . . . . .	Byte	 000015C8 _DATA	
+??00D8 . . . . . . . . . . . . .	Byte	 00001500 _DATA	
+??00D9 . . . . . . . . . . . . .	Text   	 o
+??00DA . . . . . . . . . . . . .	Byte	 000014FF _DATA	
+??00DB . . . . . . . . . . . . .	L Near	 00000B62 _TEXT	
+??00DC . . . . . . . . . . . . .	L Near	 00000B98 _TEXT	
+??00DD . . . . . . . . . . . . .	Byte	 000015F9 _DATA	
+??00DE . . . . . . . . . . . . .	Byte	 000015CC _DATA	
+??00DF . . . . . . . . . . . . .	Text   	 "
+??00E0 . . . . . . . . . . . . .	Byte	 000015CB _DATA	
+??00E2 . . . . . . . . . . . . .	L Near	 00000BDA _TEXT	
+??00E3 . . . . . . . . . . . . .	Byte	 000015FC _DATA	
+??00E4 . . . . . . . . . . . . .	Number	 00000000h   
+??00E5 . . . . . . . . . . . . .	Byte	 000015FF _DATA	
+??00E7 . . . . . . . . . . . . .	Byte	 000016CA _DATA	
+??00E8 . . . . . . . . . . . . .	Byte	 00001602 _DATA	
+??00E9 . . . . . . . . . . . . .	Text   	 o
+??00EA . . . . . . . . . . . . .	Byte	 00001601 _DATA	
+??00EB . . . . . . . . . . . . .	L Near	 00000C0C _TEXT	
+??00EC . . . . . . . . . . . . .	L Near	 00000C42 _TEXT	
+??00ED . . . . . . . . . . . . .	Byte	 000016DE _DATA	
+??00EE . . . . . . . . . . . . .	Byte	 000016CE _DATA	
+??00EF . . . . . . . . . . . . .	Text   	 "
+??00F0 . . . . . . . . . . . . .	Byte	 000016CD _DATA	
+??00F2 . . . . . . . . . . . . .	L Near	 00000C84 _TEXT	
+??00F3 . . . . . . . . . . . . .	Byte	 000016E1 _DATA	
+??00F4 . . . . . . . . . . . . .	Number	 00000000h   
+??00F5 . . . . . . . . . . . . .	Byte	 000016E4 _DATA	
+??00F7 . . . . . . . . . . . . .	Byte	 000017AF _DATA	
+??00F8 . . . . . . . . . . . . .	Byte	 000016E7 _DATA	
+??00F9 . . . . . . . . . . . . .	Text   	 o
+??00FA . . . . . . . . . . . . .	Byte	 000016E6 _DATA	
+??00FB . . . . . . . . . . . . .	L Near	 00000CB6 _TEXT	
+??00FC . . . . . . . . . . . . .	L Near	 00000CEC _TEXT	
+??00FD . . . . . . . . . . . . .	Byte	 000017C5 _DATA	
+??00FE . . . . . . . . . . . . .	Byte	 000017B3 _DATA	
+??00FF . . . . . . . . . . . . .	Text   	 "
+??0100 . . . . . . . . . . . . .	Byte	 000017B2 _DATA	
+??0102 . . . . . . . . . . . . .	L Near	 00000D47 _TEXT	
+??0103 . . . . . . . . . . . . .	Byte	 000017C8 _DATA	
+??0104 . . . . . . . . . . . . .	Number	 00000000h   
+??0105 . . . . . . . . . . . . .	Byte	 000017CB _DATA	
+??0107 . . . . . . . . . . . . .	Byte	 00001896 _DATA	
+??0108 . . . . . . . . . . . . .	Byte	 000017CE _DATA	
+??0109 . . . . . . . . . . . . .	Text   	 o
+??010A . . . . . . . . . . . . .	Byte	 000017CD _DATA	
+??010B . . . . . . . . . . . . .	L Near	 00000D79 _TEXT	
+??010C . . . . . . . . . . . . .	L Near	 00000DAF _TEXT	
+??010D . . . . . . . . . . . . .	Byte	 000018AA _DATA	
+??010E . . . . . . . . . . . . .	Byte	 0000189A _DATA	
+??010F . . . . . . . . . . . . .	Text   	 "
+??0110 . . . . . . . . . . . . .	Byte	 00001899 _DATA	
+??0112 . . . . . . . . . . . . .	L Near	 00000DF1 _TEXT	
+??0113 . . . . . . . . . . . . .	Byte	 000018AD _DATA	
+??0114 . . . . . . . . . . . . .	Number	 00000000h   
+??0115 . . . . . . . . . . . . .	Byte	 000018B0 _DATA	
+??0117 . . . . . . . . . . . . .	Byte	 0000197B _DATA	
+??0118 . . . . . . . . . . . . .	Byte	 000018B3 _DATA	
+??0119 . . . . . . . . . . . . .	Text   	 o
+??011A . . . . . . . . . . . . .	Byte	 000018B2 _DATA	
+??011B . . . . . . . . . . . . .	L Near	 00000E23 _TEXT	
+??011C . . . . . . . . . . . . .	L Near	 00000E59 _TEXT	
+??011D . . . . . . . . . . . . .	Byte	 000019AC _DATA	
+??011E . . . . . . . . . . . . .	Byte	 0000197F _DATA	
+??011F . . . . . . . . . . . . .	Text   	 "
+??0120 . . . . . . . . . . . . .	Byte	 0000197E _DATA	
+??0122 . . . . . . . . . . . . .	L Near	 00000E9B _TEXT	
+??0123 . . . . . . . . . . . . .	Byte	 000019AF _DATA	
+??0124 . . . . . . . . . . . . .	Number	 00000000h   
+??0125 . . . . . . . . . . . . .	Byte	 000019B2 _DATA	
+??0127 . . . . . . . . . . . . .	Byte	 00001A7D _DATA	
+??0128 . . . . . . . . . . . . .	Byte	 000019B5 _DATA	
+??0129 . . . . . . . . . . . . .	Text   	 o
+??012A . . . . . . . . . . . . .	Byte	 000019B4 _DATA	
+??012B . . . . . . . . . . . . .	L Near	 00000ECD _TEXT	
+??012C . . . . . . . . . . . . .	L Near	 00000F03 _TEXT	
+??012D . . . . . . . . . . . . .	Byte	 00001A80 _DATA	
+??012E . . . . . . . . . . . . .	Number	 00000000h   
+??012F . . . . . . . . . . . . .	Byte	 00001A83 _DATA	
+??0131 . . . . . . . . . . . . .	Byte	 00001B4E _DATA	
+??0132 . . . . . . . . . . . . .	Byte	 00001A86 _DATA	
+??0133 . . . . . . . . . . . . .	Text   	 o
+??0134 . . . . . . . . . . . . .	Byte	 00001A85 _DATA	
+??0135 . . . . . . . . . . . . .	L Near	 00000F4F _TEXT	
+??0136 . . . . . . . . . . . . .	L Near	 00000F85 _TEXT	
+??0137 . . . . . . . . . . . . .	Byte	 00001B6D _DATA	
+??0138 . . . . . . . . . . . . .	Byte	 00001B52 _DATA	
+??0139 . . . . . . . . . . . . .	Text   	 "
+??013A . . . . . . . . . . . . .	Byte	 00001B51 _DATA	
+??013C . . . . . . . . . . . . .	L Near	 00000FC7 _TEXT	
+??013D . . . . . . . . . . . . .	Byte	 00001B70 _DATA	
+??013E . . . . . . . . . . . . .	Number	 00000000h   
+??013F . . . . . . . . . . . . .	Byte	 00001B73 _DATA	
+??0141 . . . . . . . . . . . . .	Byte	 00001C3E _DATA	
+??0142 . . . . . . . . . . . . .	Byte	 00001B76 _DATA	
+??0143 . . . . . . . . . . . . .	Text   	 o
+??0144 . . . . . . . . . . . . .	Byte	 00001B75 _DATA	
+??0145 . . . . . . . . . . . . .	L Near	 00000FF9 _TEXT	
+??0146 . . . . . . . . . . . . .	L Near	 0000102F _TEXT	
+??0147 . . . . . . . . . . . . .	Byte	 00001C46 _DATA	
+??0148 . . . . . . . . . . . . .	Byte	 00001C42 _DATA	
+??0149 . . . . . . . . . . . . .	Text   	 "
+??014A . . . . . . . . . . . . .	Byte	 00001C41 _DATA	
+??014C . . . . . . . . . . . . .	L Near	 00001071 _TEXT	
+??014D . . . . . . . . . . . . .	Byte	 00001C49 _DATA	
+??014E . . . . . . . . . . . . .	Number	 00000000h   
+??014F . . . . . . . . . . . . .	Byte	 00001C4C _DATA	
+??0151 . . . . . . . . . . . . .	Byte	 00001D17 _DATA	
+??0152 . . . . . . . . . . . . .	Byte	 00001C4F _DATA	
+??0153 . . . . . . . . . . . . .	Text   	 o
+??0154 . . . . . . . . . . . . .	Byte	 00001C4E _DATA	
+??0155 . . . . . . . . . . . . .	L Near	 000010A3 _TEXT	
+??0156 . . . . . . . . . . . . .	L Near	 000010D9 _TEXT	
+??0157 . . . . . . . . . . . . .	Byte	 00001D1A _DATA	
+??0158 . . . . . . . . . . . . .	Number	 00000000h   
+??0159 . . . . . . . . . . . . .	Byte	 00001D1D _DATA	
+??015B . . . . . . . . . . . . .	Byte	 00001DE8 _DATA	
+??015C . . . . . . . . . . . . .	Byte	 00001D20 _DATA	
+??015D . . . . . . . . . . . . .	Text   	 o
+??015E . . . . . . . . . . . . .	Byte	 00001D1F _DATA	
+??015F . . . . . . . . . . . . .	L Near	 00001119 _TEXT	
+??0160 . . . . . . . . . . . . .	L Near	 0000114F _TEXT	
+??0161 . . . . . . . . . . . . .	Byte	 00001E06 _DATA	
+??0162 . . . . . . . . . . . . .	Byte	 00001DEC _DATA	
+??0163 . . . . . . . . . . . . .	Text   	 "
+??0164 . . . . . . . . . . . . .	Byte	 00001DEB _DATA	
+??0166 . . . . . . . . . . . . .	L Near	 00001191 _TEXT	
+??0167 . . . . . . . . . . . . .	Byte	 00001E09 _DATA	
+??0168 . . . . . . . . . . . . .	Number	 00000000h   
+??0169 . . . . . . . . . . . . .	Byte	 00001E0C _DATA	
+??016B . . . . . . . . . . . . .	Byte	 00001ED7 _DATA	
+??016C . . . . . . . . . . . . .	Byte	 00001E0F _DATA	
+??016D . . . . . . . . . . . . .	Text   	 o
+??016E . . . . . . . . . . . . .	Byte	 00001E0E _DATA	
+??016F . . . . . . . . . . . . .	L Near	 000011C3 _TEXT	
+??0170 . . . . . . . . . . . . .	L Near	 000011F9 _TEXT	
+??0171 . . . . . . . . . . . . .	Byte	 00001EDF _DATA	
+??0172 . . . . . . . . . . . . .	Byte	 00001EDB _DATA	
+??0173 . . . . . . . . . . . . .	Text   	 "
+??0174 . . . . . . . . . . . . .	Byte	 00001EDA _DATA	
+??0176 . . . . . . . . . . . . .	L Near	 0000123B _TEXT	
+??0177 . . . . . . . . . . . . .	Byte	 00001EE2 _DATA	
+??0178 . . . . . . . . . . . . .	Number	 00000000h   
+??0179 . . . . . . . . . . . . .	Byte	 00001EE5 _DATA	
+??017B . . . . . . . . . . . . .	Byte	 00001FB0 _DATA	
+??017C . . . . . . . . . . . . .	Byte	 00001EE8 _DATA	
+??017D . . . . . . . . . . . . .	Text   	 o
+??017E . . . . . . . . . . . . .	Byte	 00001EE7 _DATA	
+??017F . . . . . . . . . . . . .	L Near	 0000126D _TEXT	
+??0180 . . . . . . . . . . . . .	L Near	 000012A3 _TEXT	
+??0181 . . . . . . . . . . . . .	Byte	 00001FC8 _DATA	
+??0182 . . . . . . . . . . . . .	Byte	 00001FB4 _DATA	
+??0183 . . . . . . . . . . . . .	Text   	 "
+??0184 . . . . . . . . . . . . .	Byte	 00001FB3 _DATA	
+??0186 . . . . . . . . . . . . .	L Near	 000012F4 _TEXT	
+??0187 . . . . . . . . . . . . .	Byte	 00001FCB _DATA	
+??0188 . . . . . . . . . . . . .	Number	 00000000h   
+??0189 . . . . . . . . . . . . .	Byte	 00001FCE _DATA	
+??018B . . . . . . . . . . . . .	Byte	 00002099 _DATA	
+??018C . . . . . . . . . . . . .	Byte	 00001FD1 _DATA	
+??018D . . . . . . . . . . . . .	Text   	 o
+??018E . . . . . . . . . . . . .	Byte	 00001FD0 _DATA	
+??018F . . . . . . . . . . . . .	L Near	 00001326 _TEXT	
+??0190 . . . . . . . . . . . . .	L Near	 0000135C _TEXT	
 ??CommonHeapElemSize . . . . . .	DWord	 00000004 _DATA	
 ??ConsoleMode  . . . . . . . . .	Byte	 00000008 _DATA	
 ??TotalHeapAllocated . . . . . .	DWord	 00000000 _DATA	
@@ -1143,12 +1169,12 @@ Symbols:
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 AllocConsole@0 . . . . . . . . .	L Near	 00000000 FLAT	External STDCALL
 Arr_1  . . . . . . . . . . . . .	Byte	 00000019 _DATA	
-Arr_2  . . . . . . . . . . . . .	Byte	 00000417 _DATA	
-Arr_Len_1  . . . . . . . . . . .	Word	 00000915 _DATA	
-Arr_Len_2  . . . . . . . . . . .	Word	 00000917 _DATA	
-Arr_Un_1 . . . . . . . . . . . .	Word	 00000919 _DATA	
-Arr_Un_2 . . . . . . . . . . . .	Word	 0000091B _DATA	
-Arr_U  . . . . . . . . . . . . .	Byte	 00000815 _DATA	
+Arr_2  . . . . . . . . . . . . .	Byte	 00000419 _DATA	
+Arr_Len_1  . . . . . . . . . . .	Word	 00000919 _DATA	
+Arr_Len_2  . . . . . . . . . . .	Word	 0000091B _DATA	
+Arr_Un_1 . . . . . . . . . . . .	Word	 0000091D _DATA	
+Arr_Un_2 . . . . . . . . . . . .	Word	 0000091F _DATA	
+Arr_U  . . . . . . . . . . . . .	Byte	 00000819 _DATA	
 Black  . . . . . . . . . . . . .	Number	 00000000h   
 Blue . . . . . . . . . . . . . .	Number	 00000001h   
 Bright . . . . . . . . . . . . .	Number	 00000008h   
@@ -1158,8 +1184,8 @@ CREATE_ALWAYS  . . . . . . . . .	Number	 00000002h
 CREATE_NEW . . . . . . . . . . .	Number	 00000001h   
 CharToOem  . . . . . . . . . . .	Text   	 CharToOemA
 Cls  . . . . . . . . . . . . . .	Text   	 ClrScr
-Conv_Case_1  . . . . . . . . . .	L Near	 00000A10 _TEXT	
-Conv_Case_2  . . . . . . . . . .	L Near	 00000DCC _TEXT	
+Conv_Case_1  . . . . . . . . . .	L Near	 00000AF2 _TEXT	
+Conv_Case_2  . . . . . . . . . .	L Near	 00000D1C _TEXT	
 CreateFile . . . . . . . . . . .	Text   	 CreateFileA
 Cyan . . . . . . . . . . . . . .	Number	 00000003h   
 DISPOSE  . . . . . . . . . . . .	Text   	 dispose
@@ -1205,8 +1231,8 @@ Inchar . . . . . . . . . . . . .	Text   	 inchar
 InintLn  . . . . . . . . . . . .	Text   	 inintln
 Inintln  . . . . . . . . . . . .	Text   	 inintln
 Inint  . . . . . . . . . . . . .	Text   	 inint
-Input_First_Text . . . . . . . .	L Near	 0000079F _TEXT	
-Input_Second_Text  . . . . . . .	L Near	 000008C8 _TEXT	
+Input_First_Text . . . . . . . .	L Near	 00000796 _TEXT	
+Input_Second_Text  . . . . . . .	L Near	 000008C1 _TEXT	
 LANG_NEUTRAL . . . . . . . . . .	Number	 00000000h   
 Letter_Quotes  . . . . . . . . .	Number	 00000022h   
 LightBlue  . . . . . . . . . . .	Number	 00000009h   
@@ -1236,7 +1262,7 @@ MB_YESNOCANCEL . . . . . . . . .	Number	 00000003h
 MB_YESNO . . . . . . . . . . . .	Number	 00000004h   
 MSGBOX . . . . . . . . . . . . .	Text   	 MsgBox
 Magenta  . . . . . . . . . . . .	Number	 00000005h   
-Max_Len  . . . . . . . . . . . .	Number	 000001FFh   
+Max_Len  . . . . . . . . . . . .	Number	 00000200h   
 MessageBoxIndirect . . . . . . .	Text   	 MessageBoxIndirectA
 MessageBox . . . . . . . . . . .	Text   	 MessageBoxA
 NEWLINE  . . . . . . . . . . . .	Text   	 newline
@@ -1293,7 +1319,7 @@ OutWord  . . . . . . . . . . . .	Text   	 outword
 OutintLn . . . . . . . . . . . .	Text   	 outintln
 Outintln . . . . . . . . . . . .	Text   	 outintln
 Outint . . . . . . . . . . . . .	Text   	 outint
-Output . . . . . . . . . . . . .	L Near	 00000FE0 _TEXT	
+Output . . . . . . . . . . . . .	L Near	 00000F30 _TEXT	
 OutstrLn . . . . . . . . . . . .	Text   	 outstrln
 OutwordLn  . . . . . . . . . . .	Text   	 outwordln
 Outword  . . . . . . . . . . . .	Text   	 outword
@@ -1307,8 +1333,8 @@ PAGE_READWRITE . . . . . . . . .	Number	 00000004h
 PAGE_WRITECOPY . . . . . . . . .	Number	 00000008h   
 PAUSE  . . . . . . . . . . . . .	Text   	 pause
 Pause  . . . . . . . . . . . . .	Text   	 pause
-ProgramEndNotText  . . . . . . .	L Near	 0000114D _TEXT	
-Program_End  . . . . . . . . . .	L Near	 000011F7 _TEXT	
+ProgramEndNotText  . . . . . . .	L Near	 000012C9 _TEXT	
+Program_End  . . . . . . . . . .	L Near	 00001373 _TEXT	
 READKEY  . . . . . . . . . . . .	Text   	 readkey
 ReadKey  . . . . . . . . . . . .	Text   	 readkey
 Red  . . . . . . . . . . . . . .	Number	 00000004h   
@@ -1316,7 +1342,7 @@ STD_ERROR_HANDLE . . . . . . . .	Number	 -0000000Ch
 STD_INPUT_HANDLE . . . . . . . .	Number	 -0000000Ah   
 STD_OUTPUT_HANDLE  . . . . . . .	Number	 -0000000Bh   
 SetConsoleTitle  . . . . . . . .	Text   	 SetConsoleTitleA
-Start  . . . . . . . . . . . . .	L Near	 0000079F _TEXT	Public STDCALL
+Start  . . . . . . . . . . . . .	L Near	 00000796 _TEXT	Public STDCALL
 TRUNCATE_EXISTING  . . . . . . .	Number	 00000005h   
 URLDownloadToFile  . . . . . . .	Text   	 URLDownloadToFileA
 White  . . . . . . . . . . . . .	Number	 0000000Fh   
