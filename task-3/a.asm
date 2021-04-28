@@ -1,6 +1,7 @@
 include console.inc
     
     Max_Len equ 511
+    Letter_Quotes equ 34
     rus_letter_yo_lower equ 241
     rus_letter_A_Upper equ 128
     rus_letter_yo_Upper equ 240
@@ -131,10 +132,11 @@ Array_Output proc
 Array_Output_Start:
     xor eax, eax
     mov eax, [ebx]
-    cmp eax, 0 ;проверяем на символ конца текста
+    cmp eax, 0 ; проверяем на символ конца текста
     je Array_Output_End
-
-    jmp Array_Output_Next
+    
+    cmp al, Letter_Quotes
+    je OutputFirstQuotes
 
 Array_Output_Next:
     ConsoleMode
@@ -143,8 +145,44 @@ Array_Output_Next:
     inc ebx
     jmp Array_Output_Start
 
+OutputFirstQuotes:
+    sub eax, eax
+    inc ebx
+    mov eax, [ebx]
+    cmp al, Letter_Quotes
+    je OutputSecondQuotes
+    ConsoleMode
+    outchar Letter_Quotes
+    ConsoleMode
+    cmp eax, 0
+    je Array_Output_End
+    jmp Array_Output_Next
+
+OutputSecondQuotes:
+    sub eax, eax
+    inc ebx
+    mov eax, [ebx]
+    cmp al, Letter_Quotes
+    je OutputThirdQuotes
+    ConsoleMode
+    outchar Letter_Quotes
+    outchar Letter_Quotes
+    ConsoleMode
+    cmp eax, 0
+    je Array_Output_End
+    jmp Array_Output_Next
+    
+    OutputThirdQuotes:
+    ConsoleMode
+    outchar '\'
+    outchar Letter_Quotes
+    outchar Letter_Quotes
+    outchar Letter_Quotes
+    ConsoleMode
+    inc ebx
+    jmp Array_Output_Start
+
 Array_Output_End:
-    newline
     outstrln '"""'
     
     pop ebp
@@ -488,9 +526,9 @@ Conv_Case_1:
     outstr ' Length 2 = '
     outintln Arr_Un_2
     jb Conv_Case_2
-    outstrln ' First text is longer or they are equal'
-    outstrln ' Change letters to the symmetrical in first text'
-    outstrln ' Reverse second text'
+    outstrln ' Text 1 is longer or they are equal'
+    outstrln ' Change letters to the symmetrical in Text 1'
+    outstrln ' Reverse Text 2'
     
     push offset Arr_1
     call Text_Conv_First
@@ -499,9 +537,9 @@ Conv_Case_1:
      
     jmp Output
 Conv_Case_2:
-    outstrln ' Second text is longer'
-    outstrln ' Reverse first text'
-    outstrln ' Change letters to the symmetrical in second text'
+    outstrln ' Text 2 is longer'
+    outstrln ' Reverse Text 1'
+    outstrln ' Change letters to the symmetrical in Text 2'
     
     push offset Arr_1
     call Text_Conv_Second
@@ -510,11 +548,11 @@ Conv_Case_2:
     jmp Output
 
 Output:
-    outstrln ' First text after conversion'
+    outstrln ' Text 1 after conversion'
     push offset Arr_1
     call Array_Output
 
-    outstrln ' Second text after conversion'
+    outstrln ' Text 2 after conversion'
     push offset Arr_2
     call Array_Output
     jmp Program_End
