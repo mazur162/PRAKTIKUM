@@ -1,6 +1,8 @@
 include console.inc
     
     Max_Len equ 512
+
+    ; Буквы и символы:
     Letter_Quotes equ 34
     rus_letter_yo_lower equ 241
     rus_letter_A_Upper equ 128
@@ -10,11 +12,14 @@ include console.inc
     rus_letter_r_lower equ 224
     rus_letter_shc_Upper equ 153
     rus_letter_ye_Upper equ 133
+    rus_letter_ye_lower equ 165
+    rus_letter_shc_lower equ 233
+    rus_letter_hard_sign_lower equ 234
 
 .data
-    Arr_1 db 2*Max_Len dup (0) ;первый текст
-    Arr_2 db 2*Max_Len dup (0) ;второй текст
-    Arr_U db 256 dup (0)       ;массив уникальных символов
+    Arr_1 db Max_Len dup (0) ;первый текст
+    Arr_2 db Max_Len dup (0) ;второй текст
+    Arr_U dw 256 dup (0)       ;массив уникальных символов
     Arr_Len_1 dw ?             ;длина первого текста
     Arr_Len_2 dw ?             ;длина второго текста
     Arr_Un_1 dw ?              ;количество уникальных символов в 1 тексте
@@ -232,7 +237,7 @@ Array_Count_Exit:
     mov ecx, 255
 
 Array_Count_Set_Zero: ; обнуляем массив для счета символов
-    mov byte ptr [ebx], 0
+    mov word ptr [ebx], 0
     add ebx, 2
     Loop Array_Count_Set_Zero
 
@@ -249,7 +254,7 @@ Array_Count_Length endp
 
 
 ;Преобразование текста
-;1) заменить латинскую букву симметричной
+;1) заменить на симметричные буквы
 ;На вход подаётся адрес начала массива
 
 Text_Conv_First proc
@@ -268,8 +273,6 @@ Text_Conv_First_Start:
     cmp al, 'A'
     jb Text_Conv_First_Skip
     
-    cmp al, 241
-    ja Text_Conv_First_Skip
 
     cmp al, 'Z'
     ja Text_Conv_First_Check1
@@ -291,14 +294,37 @@ Text_Conv_First_Check2:
     cmp al, rus_letter_A_Upper
     jb Text_Conv_First_Skip
     
-    cmp al, 175
+    cmp al, rus_letter_p_lower
     je Text_Conv_First_Skip
 
-    cmp al, 241
-    je Text_Conv_First_Change_Lower_RUS
+    cmp al, rus_letter_yo_lower
+    jne W1
+    mov al, rus_letter_shc_lower
+    mov [ebx], al
+    jmp Text_Conv_First_Skip
+
+W1:
+    cmp al, rus_letter_shc_lower
+    jne W2
+    mov al, rus_letter_yo_lower
+    mov [ebx], al
+    jmp Text_Conv_First_Skip
+
+W2:
+    cmp al, rus_letter_yo_Upper
+    jne W3
+    mov al, rus_letter_shc_Upper
+    mov [ebx], al
+    jmp Text_Conv_First_Skip
+
+W3:
+    cmp al, rus_letter_shc_Upper
+    jne W5
+    mov al, rus_letter_yo_Upper
+    mov [ebx], al
+    jmp Text_Conv_First_Skip
     
-    cmp al, 240
-    je Text_Conv_First_Change_Upper_RUS
+W5:
 
     cmp al, rus_letter_ya_Upper
     ja Text_Conv_First_Check3
@@ -332,21 +358,21 @@ Text_Conv_First_Change_Lower_ENG:
 
 Text_Conv_First_Change_Upper_RUS:
     mov al, [ebx]
-    cmp al, 240
+    cmp al, rus_letter_yo_Upper
     jne F
-    mov al, 153
+    mov al, rus_letter_shc_Upper
     jmp Text_Conv_First_Skip
 F:
-    cmp al, 153
+    cmp al, rus_letter_shc_Upper
     jne F1
-    mov al, 240
+    mov al, rus_letter_yo_Upper
     jmp Text_Conv_First_Skip
 F1:
-    cmp al, 133 ; сравниваем с Е
+    cmp al, rus_letter_ye_Upper ; сравниваем с Е
     ja L  
     jmp L2  
 L:
-    cmp al, 153
+    cmp al, rus_letter_shc_Upper
     ja L2      
 L1:
     mov [ebx], al
@@ -364,21 +390,21 @@ Q:
 
 Text_Conv_First_Change_Lower_RUS:
     mov al, [ebx]
-    cmp al, 241
+    cmp al, rus_letter_yo_lower
     jne M
-    mov al, 233
+    mov al, rus_letter_shc_lower
     jmp Text_Conv_First_Skip
 M:
-    cmp al, 233
+    cmp al, rus_letter_shc_lower
     jne M1
-    mov al, 241
+    mov al, rus_letter_yo_lower
     jmp Text_Conv_First_Skip
 M1:
-    cmp al, 165 ; сравниваем с е
+    cmp al, rus_letter_ye_lower ; сравниваем с е
     ja M2  
     jmp K2 
 M2:
-    cmp al, 234 ; сравниваем с ъ
+    cmp al, rus_letter_hard_sign_lower ; сравниваем с ъ
     jae K2  
     jmp K1 
   
@@ -477,7 +503,6 @@ Start:
 
 Input_First_Text:
     outstr ' Text 1: '
-    xor eax, eax 
     push offset Arr_1
     call Array_Input
 
@@ -496,7 +521,6 @@ Input_Second_Text:
     outstr ' Text 2: '
     flush
 
-    xor eax, eax
     push offset Arr_2
     call Array_Input
 
@@ -504,14 +528,11 @@ Input_Second_Text:
     je ProgramEndNotText
 
     push offset Arr_2
-    mov dx, Arr_Un_1
     call Array_Count_Length
-    mov Arr_Un_1, dx
     mov Arr_Un_2, ax
     outstr ' Length 2 = '
     outintln Arr_Un_2
     newline
-    xor dx, dx
 
 Conv_Case_1:
     mov ax, Arr_Un_1
@@ -541,13 +562,11 @@ Conv_Case_2:
 Output:
     newline
     outstrln ' Text 1 after conversion: '
-    outstrln '"""'
     push offset Arr_1
     call Array_Output
 
     newline
     outstrln ' Text 2 after conversion:'
-    outstrln '"""'
     push offset Arr_2
     call Array_Output
     jmp Program_End
