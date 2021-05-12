@@ -72,7 +72,7 @@ begin
         n := random(M);
         p1 := random (population_volume);
         p2 := random (population_volume);
-        if (not pop[p1].alive) or (not pop[p1].alive) then
+        if (not pop[p1].alive) or (not pop[p2].alive) then
             OnePoint_Cross (pop);
         cross(pop[p1].gen, pop[p2].gen, n, n, pop[j].gen, pop[j].gen);
         pop[j].funct := F (pop[j].gen);
@@ -115,7 +115,7 @@ begin
             end;
         p1 := random (population_volume);
         p2 := random (population_volume);
-        if (not pop[p1].alive) or (not pop[p1].alive) then
+        if (not pop[p1].alive) or (not pop[p2].alive) then
             TwoPoints_Cross (pop);
         cross(pop[p1].gen, pop[p2].gen, n1, n2, pop[j].gen, pop[j].gen);
         pop[j].funct := F (pop[j].gen);
@@ -148,7 +148,7 @@ begin
             
         p1 := random (population_volume);
         p2 := random (population_volume);
-        if (not pop[p1].alive) or (not pop[p1].alive) then
+        if (not pop[p1].alive) or (not pop[p2].alive) then
             Universal_Cross (pop);
         for i := 1 to M do 
             begin
@@ -187,7 +187,7 @@ begin
             
         p1 := random (population_volume);
         p2 := random (population_volume);
-        if (not pop[p1].alive) or (not pop[p1].alive) then
+        if (not pop[p1].alive) or (not pop[p2].alive) then
                 Uniform_Cross (pop);
         cross_odin(pop[p1].gen, pop[p2].gen, i, pop[j].gen);
 
