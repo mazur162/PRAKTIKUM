@@ -263,9 +263,6 @@ begin
                 Error();
         until error_flag = 0;
 
-    assign (log, 'log.txt');
-    rewrite(log);
-
 end
 else
 begin
@@ -304,10 +301,11 @@ begin
 
     close(parametrs);
 
-    assign (log, 'log.txt');
-    rewrite(log);
 
 end;
+
+    assign (log, 'log.txt');
+    rewrite(log);
     writeln('______________________________________________');
 
     Create_New();
