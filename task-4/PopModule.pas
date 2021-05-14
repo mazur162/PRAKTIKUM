@@ -6,7 +6,7 @@ uses
     FuncSort, Crt, SysUtils;
 
     procedure Best ();
-    procedure Create_New();
+    procedure Create_New(var gen: array of longword; var alive: array of boolean; var funct: array of double);
     procedure Kill(var i:integer);
     procedure Ident();
     procedure Pop_Output ();
@@ -65,7 +65,7 @@ begin
 end;
 
 // Генерация случайной популяции
-procedure Create_New();
+procedure Create_New(var gen: array of longword; var alive: array of boolean; var funct: array of double);
 var
     i: integer;
 begin
@@ -110,6 +110,9 @@ begin
 end;
 
 procedure Pop_Output ();
+var
+    time1, time2 : double;
+    j : integer;
 begin
     time1 := now;
     for j := 1 to population_volume do
@@ -140,7 +143,7 @@ begin
                     end;
             writeln(log);
             writeln(log, ' Best value: ');
-            writeln(log, ' X = ', FloatToStr(4/round(exp(M*ln(2)))*gen[j]));
+            writeln(log, ' X = ', FloatToStr(4/round(exp(M*ln(2)))*gen[1]));
             writeln(log, ' F(x) = ', FloatToStr(funct[1]));
             writeln(log);
 

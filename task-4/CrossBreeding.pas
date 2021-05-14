@@ -144,9 +144,10 @@ procedure Universal_Cross ();
 var
     i: integer;
     k, p1, p2, dead_number: integer;
+    time1, time2 : double;
 begin
 
-    
+    time1 := now;
     dead_number := 0;
     for i := 0 to population_volume - 1 do
         if not alive[i] then
@@ -177,6 +178,9 @@ begin
     until dead_number = 1;
 
     Bubble_Sort_Decrease(population_volume);
+
+    time2 := now;
+    time += (time2 - time1);
 end;
 
 // Однородное скрещивание
@@ -184,8 +188,9 @@ procedure Uniform_Cross ();
 var
     i, j: integer;
     p1, p2, dead_number: integer;
+    time1, time2 : double;
 begin
-   
+    time1 := now;
     dead_number := 0;
     for i := 1 to population_volume do
         if not alive[i] then
@@ -210,6 +215,8 @@ begin
     until dead_number = 1;
 
     Bubble_Sort_Decrease(population_volume);
+    time2 := now;
+    time += (time2 - time1);
 end;
 
 begin

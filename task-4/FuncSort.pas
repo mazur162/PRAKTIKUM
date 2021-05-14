@@ -56,7 +56,7 @@ var
     log: text; // Файл с популяциями решений
 
     function F (y: longword): double;
-    procedure Bubble_Sort_Decrease (length: integer); 
+    procedure Bubble_Sort_Decrease (length: integer);
     function Convert_OX(var h: array of longword): real;
 
 implementation

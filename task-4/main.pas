@@ -308,7 +308,7 @@ end;
     rewrite(log);
     writeln('______________________________________________');
 
-    Create_New();
+    Create_New(gen, alive, funct);
     Pop_Output ();
 
     if Check() then
@@ -379,7 +379,7 @@ end;
         if Check() then
             begin
                 Crt.Textcolor(5);
-                write(' Total Time: ',(time* power(10,5)):1:3, ' seconds');
+                write(' Total Time: ',(time*power(10,5)):1:3, ' seconds');
                 Crt.Textcolor(Black);
                 close(log);
                 halt;
