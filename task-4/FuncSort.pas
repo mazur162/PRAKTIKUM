@@ -16,7 +16,7 @@ type
   
 var
 
-    time1, time2, time: double;
+    time: double;
     genom : array[0..M-1] of bit; // Геном одной особи
     gen : array[1..population_volume] of longword;
     funct : array[1..population_volume] of double;
@@ -76,6 +76,7 @@ var
     i, j: integer;
     m: real;
     k: longword;
+    time1, time2: double;
 begin
     time1 := now;
     for i := (length - 1) downto 1 do
@@ -100,6 +101,7 @@ function Convert_OX(var h: array of longword): real;
 var
     i: integer;
     x, k: real;
+    time1, time2: double;
 begin
     time1 := now;
     k := (b - a) / power(2, M);

@@ -15,6 +15,8 @@ uses
 implementation
 
 function Check (): boolean;
+var
+    time1, time2: double;
 begin
     Check := false;
     if valueless_iters > max_valueless_iters then
@@ -48,6 +50,8 @@ end;
 
 // Оценка популяции, поиск наилучшей особи
 procedure Best ();
+var
+    time1, time2: double;
 begin
     Crt.TextColor(Green);
     writeln(' Best value: ');
@@ -68,6 +72,7 @@ end;
 procedure Create_New(var gen: array of longword; var alive: array of boolean; var funct: array of double);
 var
     i: integer;
+    time1, time2 : double;
 begin
     time1 := now;
     for i := 1 to population_volume do
@@ -83,6 +88,7 @@ end;
 
 // Убиваем особь (меняем флаг)
 procedure Kill(var i:integer);
+var time1, time2 : double;
 begin
     time1 := now;
     alive[i] := false;
@@ -94,6 +100,7 @@ end;
 procedure Ident(); 
 var
     i, j: integer;
+    time1, time2 : double;
 begin
     time1 := now;
     for i := 1 to population_volume do

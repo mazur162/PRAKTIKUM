@@ -15,7 +15,9 @@ implementation
 // меняет местами биты двух генов
 
 procedure cross (a, b: longword ; t2, t1: integer; var x, y: longword);
-var gen1, gen2, gen_x, gen_y: longword ;
+var
+    gen1, gen2, gen_x, gen_y: longword ;
+    time1, time2 : double;
 begin
     time1 := now;
 
@@ -62,6 +64,7 @@ procedure OnePoint_Cross ();
 var
     n, i, j, dead_number: integer;
     p1, p2: integer;
+    time1, time2 : double;
 begin
     time1:=now;
     
@@ -98,6 +101,7 @@ procedure TwoPoints_Cross ();
 var
     n1, n2, t, i, j, dead_number: integer;
     p1, p2: integer;
+    time1, time2 : double;
 begin
     time1 := now;
     

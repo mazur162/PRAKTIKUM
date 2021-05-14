@@ -14,6 +14,7 @@ implementation
 procedure Tournament_Select ();  
 var
     i, j, loser_index, winner_index, N: integer;
+    time1, time2 : double;
 begin
     time1 := now;
     N := population_volume - preserved_high_positions - preserved_low_positions;
@@ -56,6 +57,7 @@ procedure Cut_Select ();
 var
     T: real;
     N, N0, l, i: integer;
+    time1, time2 : double;
 begin
     time1 := now;
     l := 1;

@@ -14,7 +14,9 @@ procedure Reverse_Mut ();
 implementation
 // Инверсия бита по индексу
 procedure Inverse_Bit (var h: longword; i: integer; time: double);
-var gen: longword;
+var
+    gen: longword;
+    time1, time2 : double;
 begin
     time1 := 0;
     gen := 1 shl i;
@@ -27,6 +29,7 @@ end;
 procedure OneBit_Mut ();
 var
     k: integer;
+    time1, time2 : double;
 begin
     writeln(' ', trunc(variability*population_volume) + 1,' individs will mutate');
     time1 := now;
@@ -52,6 +55,7 @@ end;
 procedure Change_Bit (num, i, j : integer; time: double);
 var
     gen_i, gen_j, t1, t2: longword;
+    time1, time2 : double;
 begin
     time1 := now;
     
@@ -78,6 +82,7 @@ end;
 procedure TwoBits_Swap_Mut ();
 var
     i, j, k, num: integer;
+    time1, time2 : double;
 begin
     writeln(' ', trunc(variability*population_volume) + 1,' individs will mutate');
     time1 := now;
@@ -117,6 +122,7 @@ end;
 procedure Reverse_Mut ();
 var
     i, k, num, s: integer;
+    time1, time2 : double;
 begin
     writeln(' ', trunc(variability*population_volume) + 1,' individs will mutate');
     
