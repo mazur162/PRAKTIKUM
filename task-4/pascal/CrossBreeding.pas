@@ -5,16 +5,16 @@ interface
 uses
     FuncSort, PopModule, SysUtils;
 
-procedure OnePoint_Cross ();
-procedure TwoPoints_Cross ();
-procedure Universal_Cross ();
-procedure Uniform_Cross ();
+procedure OnePoint_Cross (var time: double);
+procedure TwoPoints_Cross (var time: double);
+procedure Universal_Cross (var time: double);
+procedure Uniform_Cross (var time: double);
 
 implementation
 
 // меняет местами биты двух генов
 
-procedure cross (a, b: longword ; t2, t1: integer; var x, y: longword);
+procedure cross (a, b: longword ; t2, t1: integer; var x, y: longword; var time: double);
 var
     gen1, gen2, gen_x, gen_y: longword ;
     time1, time2 : double;
@@ -40,27 +40,32 @@ end;
 
 // скрещивание с маской
 
-procedure cross_odin (a, b, t: longword; var x: longword);
-var t1, i: integer;
+procedure cross_odin (a, b, t: longword; var x: longword; var time: double);
+var
+    t1, i: integer;
     nan: longword;
+    time1, time2 : double;
 begin
-    
+    time1 := now;
     x := 0;
     for i := 0 to M do
     begin
         t1 := round(exp(i*ln(2)));
         t1 := t1 and t;
         if (t1 = 0) then
-            cross(x, a, i, i, x, nan)
+            cross(x, a, i, i, x, nan, time)
         else
-            cross(x, b, i, i, x, nan);
+            cross(x, b, i, i, x, nan, time);
     end;
+
+    time2 := now;
+    time += (time2 - time1);
 end;
 
 // СКРЕЩИВАНИЕ:
 
 // Одноточечное скрещивание
-procedure OnePoint_Cross ();
+procedure OnePoint_Cross (var time: double);
 var
     n, i, j, dead_number: integer;
     p1, p2: integer;
@@ -83,13 +88,13 @@ begin
         p1 := random (population_volume);
         p2 := random (population_volume);
         if (not alive[p1]) or (not alive[p2]) then
-            OnePoint_Cross ();
-        cross(gen[p1], gen[p2], n, n, gen[j], gen[j]);
-        funct[j] := F (gen[j]);
+            OnePoint_Cross (time); 
+        cross(gen[p1], gen[p2], n, n, gen[j], gen[j], time);
+        funct[j] := F (gen[j], time);
         alive[j] := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
-    Bubble_Sort_Decrease(population_volume);
+    Bubble_Sort_Decrease(population_volume, time);
 
     time2 := now;
     time += (time2 - time1);
@@ -97,7 +102,7 @@ begin
 end;
 
 // Двуточечное скрещение
-procedure TwoPoints_Cross ();
+procedure TwoPoints_Cross (var time: double);
 var
     n1, n2, t, i, j, dead_number: integer;
     p1, p2: integer;
@@ -130,21 +135,21 @@ begin
         p1 := random (population_volume);
         p2 := random (population_volume);
         if (not alive[p1]) or (not alive[p2]) then
-            TwoPoints_Cross ();
-        cross(gen[p1], gen[p2], n1, n2, gen[j], gen[j]);
-        funct[j] := F (gen[j]);
+            TwoPoints_Cross (time);
+        cross(gen[p1], gen[p2], n1, n2, gen[j], gen[j], time);
+        funct[j] := F (gen[j], time);
         alive[j] := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
 
-    Bubble_Sort_Decrease(population_volume);
+    Bubble_Sort_Decrease(population_volume, time);
 
     time2 := now;
     time += (time2 - time1);
 end;
 
 // Универсальное скрещивание
-procedure Universal_Cross ();
+procedure Universal_Cross (var time: double);
 var
     i: integer;
     k, p1, p2, dead_number: integer;
@@ -167,28 +172,28 @@ begin
         p1 := random (population_volume);
         p2 := random (population_volume);
         if (not alive[p1] or (not alive[p2])) then
-            Universal_Cross ();
+            Universal_Cross (time);
         for i := 1 to M do 
             begin
                 k := random(2) mod 2;
                 case k of
-                    1: cross(gen[p1], gen[p1], 0, M-1, gen[j], gen[j]);
-                    2: cross(gen[p2], gen[p2], 0, M-1, gen[j], gen[j]);
+                    1: cross(gen[p1], gen[p1], 0, M-1, gen[j], gen[j], time);
+                    2: cross(gen[p2], gen[p2], 0, M-1, gen[j], gen[j], time);
                 end;
             end;
-        funct[j] := F (gen[j]);
+        funct[j] := F (gen[j], time);
         alive[j] := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
 
-    Bubble_Sort_Decrease(population_volume);
+    Bubble_Sort_Decrease(population_volume, time);
 
     time2 := now;
     time += (time2 - time1);
 end;
 
 // Однородное скрещивание
-procedure Uniform_Cross ();
+procedure Uniform_Cross (var time: double);
 var
     i, j: integer;
     p1, p2, dead_number: integer;
@@ -210,15 +215,15 @@ begin
         p1 := random (population_volume);
         p2 := random (population_volume);
         if (not alive[p1]) or (not alive[p2]) then
-                Uniform_Cross ();
-        cross_odin(gen[p1], gen[p2], i, gen[j]);
+                Uniform_Cross (time);
+        cross_odin(gen[p1], gen[p2], i, gen[j], time);
 
-        funct[j] := F(gen[j]);
+        funct[j] := F(gen[j], time);
         alive[j] := true;
         dead_number := dead_number - 1;
     until dead_number = 1;
 
-    Bubble_Sort_Decrease(population_volume);
+    Bubble_Sort_Decrease(population_volume, time);
     time2 := now;
     time += (time2 - time1);
 end;

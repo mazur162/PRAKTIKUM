@@ -308,10 +308,10 @@ end;
     rewrite(log);
     writeln('______________________________________________');
 
-    Create_New(gen, alive, funct);
-    Pop_Output ();
+    Create_New(gen, alive, funct, time);
+    Pop_Output (time);
 
-    if Check() then
+    if Check(time) then
         begin
             Crt.Textcolor(5);
             write(' Total Time: ', (time* power(10,5)):1:3, ' seconds');
@@ -338,14 +338,14 @@ end;
         Crt.Textcolor(Black);
 
         case select of
-            1: Tournament_Select ();
-            2: Cut_Select ();
+            1: Tournament_Select (time);
+            2: Cut_Select (time);
         end;
 
 
         writeln;
-        Pop_Output ();
-        if Check() then
+        Pop_Output (time);
+        if Check(time) then
             begin
                 Crt.Textcolor(5);
                 write(' Total Time: ', (time* power(10,5)):1:3, ' seconds');
@@ -368,15 +368,15 @@ end;
         writeln;
 
         case cross of
-            1: OnePoint_Cross ();
-            2: TwoPoints_Cross ();
-            3: Universal_Cross ();
-            4: Uniform_Cross ();
+            1: OnePoint_Cross (time);
+            2: TwoPoints_Cross (time);
+            3: Universal_Cross (time);
+            4: Uniform_Cross (time);
         end;
 
 
-        Pop_Output ();
-        if Check() then
+        Pop_Output (time);
+        if Check(time) then
             begin
                 Crt.Textcolor(5);
                 write(' Total Time: ',(time*power(10,5)):1:3, ' seconds');
@@ -399,12 +399,12 @@ end;
         writeln;
 
         case mutat of
-            1: OneBit_Mut ();
-            2: TwoBits_Swap_Mut ();
-            3: Reverse_Mut ();
+            1: OneBit_Mut (time);
+            2: TwoBits_Swap_Mut (time);
+            3: Reverse_Mut (time);
         end;
-        Pop_Output ();
-        if Check() then
+        Pop_Output (time);
+        if Check(time) then
             begin
                 Crt.Textcolor(5);
                 write(' Total Time: ', (time* power(10,5)):1:3, ' seconds');
@@ -412,7 +412,7 @@ end;
                 close(log);
                 halt;
             end;
-        Bubble_Sort_Decrease (population_volume);
+        Bubble_Sort_Decrease (population_volume, time);
 
         if funct[1] - max < quality_epsilon then
             begin
@@ -422,7 +422,7 @@ end;
         else
                 max := funct[1];
         writeln;
-        if Check() then
+        if Check(time) then
             begin
                 Crt.Textcolor(5);
                 write(' Total Time: ', (time* power(10,5)):1:3, ' seconds');

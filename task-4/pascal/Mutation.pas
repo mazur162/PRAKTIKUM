@@ -6,10 +6,10 @@ uses
     FuncSort, PopModule, Crt, SysUtils;
 
 procedure Inverse_Bit (var h: longword; i: integer; time: double);
-procedure OneBit_Mut ();
-procedure TwoBits_Swap_Mut ();
+procedure OneBit_Mut (var time: double);
+procedure TwoBits_Swap_Mut (var time: double);
 procedure Change_Bit (num, i, j : integer; time: double);
-procedure Reverse_Mut ();
+procedure Reverse_Mut (var time: double);
 
 implementation
 // Инверсия бита по индексу
@@ -26,7 +26,7 @@ begin
 end;
 
 // Мутация изменением случайного бита
-procedure OneBit_Mut ();
+procedure OneBit_Mut (var time: double);
 var
     k: integer;
     time1, time2 : double;
@@ -38,7 +38,7 @@ begin
         i := random(M - 1) + 1;
         j := random (population_volume - 2) + 2;
         Inverse_Bit(gen[j],i, time);
-        funct[j] := F (gen[j]);
+        funct[j] := F (gen[j], time);
         if mode = 0 then   // тестовый режим
             begin
                 writeln(log, ' ', k,') Individ N ',j, 'mutated in bit N ',i);
@@ -46,8 +46,8 @@ begin
                     writeln(' ', k,') Individ N ',j, 'mutated in bit N ',i)
             end;
     end;
-    Bubble_Sort_Decrease (population_volume);
-    Ident();
+    Bubble_Sort_Decrease (population_volume, time);
+    Ident(time);
     time2 := now;
     time += (time2 - time1);
 end;
@@ -79,7 +79,7 @@ begin
 end;
 
 // Мутация перестановкой случайно выбранных битов местами 
-procedure TwoBits_Swap_Mut ();
+procedure TwoBits_Swap_Mut (var time: double);
 var
     i, j, k, num: integer;
     time1, time2 : double;
@@ -105,21 +105,21 @@ begin
                     end;
                     Change_Bit (num, i, j, time);
                 time1 := 0;
-                funct[num] := F (gen[num]);
+                funct[num] := F (gen[num], time);
                 time2 := now;
                 time += (time2 - time1);
         end;
     writeln;
     time1 := 0;
-    Ident();
-    Bubble_Sort_Decrease (population_volume);
+    Ident(time);
+    Bubble_Sort_Decrease (population_volume, time);
     time2 := now;
     time += (time2 - time1);
 end;
 
 
 // Мутация реверсом битовой строки, начиная со случайно выбранного символа
-procedure Reverse_Mut ();
+procedure Reverse_Mut (var time: double);
 var
     i, k, num, s: integer;
     time1, time2 : double;
@@ -137,7 +137,7 @@ begin
                     j := M - s + 1;
                     Change_Bit (num, i, j, time);
                 end;
-            funct[num] := F (gen[num]);
+            funct[num] := F (gen[num], time);
             time2 := now;
             time += (time2 - time1);
             if mode = 0 then   // тестовый режим
@@ -151,8 +151,8 @@ begin
         end;
     writeln;
     time1 := now;
-    Ident();
-    Bubble_Sort_Decrease (population_volume);
+    Ident(time);
+    Bubble_Sort_Decrease (population_volume, time);
     time2 := now;
     time += (time2 - time1);
 end;

@@ -5,16 +5,16 @@ interface
 uses
     FuncSort, Crt, SysUtils;
 
-    procedure Best ();
-    procedure Create_New(var gen: array of longword; var alive: array of boolean; var funct: array of double);
+    procedure Best (var time: double);
+    procedure Create_New(var gen: array of longword; var alive: array of boolean; var funct: array of double; var time: double);
     procedure Kill(var i:integer);
-    procedure Ident();
-    procedure Pop_Output ();
-    function Check (): boolean;
+    procedure Ident(var time: double);
+    procedure Pop_Output (var time: double);
+    function Check (var time: double): boolean;
 
 implementation
 
-function Check (): boolean;
+function Check (var time: double): boolean;
 var
     time1, time2: double;
 begin
@@ -23,7 +23,7 @@ begin
         begin
             writeln(' We have reached max_valueless_iters. Stop');
             time1 := now;
-            Best();
+            Best(time);
             Check := true;
             time2 := now;
             time += (time2 - time1);
@@ -32,7 +32,7 @@ begin
         begin
             writeln(' We have reached max_iters. Stop');
             time1 := now;
-            Best();
+            Best(time);
             Check := true;
             time2 := now;
             time += (time2 - time1);
@@ -41,7 +41,7 @@ begin
         begin
             writeln(' We have reached enough_function_value. Stop');
             time1 := now;
-            Best();
+            Best(time);
             Check := true;
             time2 := now;
             time += (time2 - time1);
@@ -49,7 +49,7 @@ begin
 end;
 
 // Оценка популяции, поиск наилучшей особи
-procedure Best ();
+procedure Best (var time: double);
 var
     time1, time2: double;
 begin
@@ -69,7 +69,7 @@ begin
 end;
 
 // Генерация случайной популяции
-procedure Create_New(var gen: array of longword; var alive: array of boolean; var funct: array of double);
+procedure Create_New(var gen: array of longword; var alive: array of boolean; var funct: array of double; var time: double);
 var
     i: integer;
     time1, time2 : double;
@@ -79,9 +79,9 @@ begin
         begin
             gen[i] := random(round(exp(M*ln(2))));
             alive[i] := true;
-            funct[i] := F (gen[i]);
+            funct[i] := F (gen[i], time);
         end;
-    Bubble_Sort_Decrease(population_volume);
+    Bubble_Sort_Decrease(population_volume, time);
     time2 := now;
     time += (time2 - time1);
 end;
@@ -97,7 +97,7 @@ begin
 end;
 
 // Замена дубликатов случайными новыми особями
-procedure Ident(); 
+procedure Ident(var time: double); 
 var
     i, j: integer;
     time1, time2 : double;
@@ -109,14 +109,14 @@ begin
                 (alive[j]) and (i<>j) then
                 begin
                     gen[j] := random(round(exp(M*ln(2))));
-                    funct[j] := F (gen[j]);
+                    funct[j] := F (gen[j], time);
                 end;
-    Bubble_Sort_Decrease (population_volume);
+    Bubble_Sort_Decrease (population_volume, time);
     time2 := now;
     time += (time2 - time1);
 end;
 
-procedure Pop_Output ();
+procedure Pop_Output (var time: double);
 var
     time1, time2 : double;
     j : integer;
@@ -126,10 +126,10 @@ begin
         if (gen[j]) > round(exp(M*ln(2))) then
             begin
                 gen[j] := gen[j] - round(exp(M*ln(2)));
-                funct[j] := F (gen[j]);
+                funct[j] := F (gen[j], time);
             end;
-    Ident();
-    Bubble_Sort_Decrease (population_volume);
+    Ident(time);
+    Bubble_Sort_Decrease (population_volume, time);
     time2 := now;
     time += (time2 - time1);
     if mode = 0 then
@@ -146,7 +146,7 @@ begin
                         write(log, '     ');
                         
                         write(log, (4/round(exp(M*ln(2)))*gen[j]):2:12, '     ');
-                        writeln(log, (F (gen[j])):3:13);
+                        writeln(log, (F (gen[j], time)):3:13);
                     end;
             writeln(log);
             writeln(log, ' Best value: ');
@@ -173,14 +173,14 @@ begin
                                     write((gen[j] shr i) and 1);
                                 write('     ');
                                 write((4/round(exp(M*ln(2)))*gen[j]):2:12, '     ');
-                                writeln((F (gen[j])):3:13);
+                                writeln((F (gen[j], time)):3:13);
                             end;
                 end;
         end;
     writeln;
     time1 := now;
-    Bubble_Sort_Decrease (population_volume);
-    Best();
+    Bubble_Sort_Decrease (population_volume, time);
+    Best(time);
     time2 := now;
     time += (time2 - time1);
     

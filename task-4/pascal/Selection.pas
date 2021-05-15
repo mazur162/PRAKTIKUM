@@ -5,13 +5,13 @@ interface
 uses
     FuncSort, Crt, PopModule, SysUtils;
 
-    procedure Tournament_Select ();
-    procedure Cut_Select (); 
+    procedure Tournament_Select (var time: double);
+    procedure Cut_Select (var time: double); 
 
 implementation
 
 // Отбор турнирный
-procedure Tournament_Select ();  
+procedure Tournament_Select (var time: double);  
 var
     i, j, loser_index, winner_index, N: integer;
     time1, time2 : double;
@@ -29,7 +29,7 @@ begin
             j := preserved_high_positions + random(N);
             if i <> j then
                 begin
-                    if F (gen[i]) > F (gen[j]) then
+                    if F (gen[i], time) > F (gen[j], time) then
                         begin
                             loser_index := j;
                             winner_index := i;
@@ -41,7 +41,7 @@ begin
                         end;
         end
             else
-                Tournament_Select();
+                Tournament_Select(time);
         Kill(loser_index);
         time2 := now;
         time += (time2 - time1);
@@ -53,7 +53,7 @@ begin
 end;
 
 // Отбор усечением
-procedure Cut_Select ();
+procedure Cut_Select (var time: double);
 var
     T: real;
     N, N0, l, i: integer;
@@ -86,7 +86,7 @@ begin
             until l = N0 + 1;
         end;
     time1 := now;
-    Bubble_Sort_Decrease (population_volume);
+    Bubble_Sort_Decrease (population_volume, time);
     time2 := now;
     time += (time2 - time1);
 end;

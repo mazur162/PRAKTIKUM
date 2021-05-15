@@ -55,23 +55,27 @@ var
     parametrs: text; // Файл с параметрами
     log: text; // Файл с популяциями решений
 
-    function F (y: longword): double;
-    procedure Bubble_Sort_Decrease (length: integer);
-    function Convert_OX(var h: array of longword): real;
+    function F (y: longword; var time: double): double;
+    procedure Bubble_Sort_Decrease (length: integer; var time: double);
+    function Convert_OX(var h: array of longword; var time: double): real;
 
 implementation
 
 // Функция (вариант 1)
-function F (y: longword): double;
+function F (y: longword; var time: double): double;
 var
     x: double;
+    time1, time2 : double;
 begin
+    time1 := now;
     x := y * 4 / power(2,M);
     F := (x - 2) * (x - 2.5) * (x - 3.5) * (1 - exp(x - 1.5));
+    time2 := now;
+    time += (time2 - time1);
 end;
 
 // Сортировка методом пузырька (по убыванию)
-procedure Bubble_Sort_Decrease (length: integer); 
+procedure Bubble_Sort_Decrease (length: integer; var time: double); 
 var
     i, j: integer;
     m: real;
@@ -97,7 +101,7 @@ begin
 end;
 
 // Перевод двоичного кода в координату на OX
-function Convert_OX(var h: array of longword): real;
+function Convert_OX(var h: array of longword; var time: double): real;
 var
     i: integer;
     x, k: real;
