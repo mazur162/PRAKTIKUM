@@ -5,7 +5,7 @@
 
  max_iters = 500 # максимальное число итераций
 
- max_valueless_iters = 200
+ max_valueless_iters = 100
  # максимальное число итераций без улучшения качества
 
  enough_function_value = 11 # достаточное значение функции

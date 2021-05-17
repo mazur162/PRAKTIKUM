@@ -1,4 +1,4 @@
-unit FuncSort;
+unit Func;
 
 interface
 
@@ -55,68 +55,23 @@ var
     parametrs: text; // Файл с параметрами
     log: text; // Файл с популяциями решений
 
-    function F (y: longword; var time: double): double;
-    procedure Bubble_Sort_Decrease (length: integer; var time: double);
-    function Convert_OX(var h: array of longword; var time: double): real;
+    function F (y: longword): double;
 
 implementation
 
 // Функция (вариант 1)
-function F (y: longword; var time: double): double;
+function F (y: longword): double;
 var
     x: double;
-    time1, time2 : double;
+    time1, time2, d_time : double;
 begin
     time1 := now;
+    d_time := 0;
     x := y * 4 / power(2,M);
     F := (x - 2) * (x - 2.5) * (x - 3.5) * (1 - exp(x - 1.5));
     time2 := now;
-    time += (time2 - time1);
-end;
-
-// Сортировка методом пузырька (по убыванию)
-procedure Bubble_Sort_Decrease (length: integer; var time: double); 
-var
-    i, j: integer;
-    m: real;
-    k: longword;
-    time1, time2: double;
-begin
-    time1 := now;
-    for i := (length - 1) downto 1 do
-        for j := 1  to i do
-            if funct[j] < funct[j+1] then 
-        begin
-            k := gen[j];
-            m := funct[j];
-
-            gen[j] := gen[j+1];
-            funct[j] := funct[j+1];
-
-            gen[j+1] := k;
-            funct[j+1] := m;
-        end;
-    time2 := now;
-    time += (time2 - time1);
-end;
-
-// Перевод двоичного кода в координату на OX
-function Convert_OX(var h: array of longword; var time: double): real;
-var
-    i: integer;
-    x, k: real;
-    time1, time2: double;
-begin
-    time1 := now;
-    k := (b - a) / power(2, M);
-    x := 0;
-    for i := 1 to M do
-        x := x + h[i - 1] * power(2, (M - i));
-        // Номер h в десятичной системе среди отрезков разбиения
-    x := x * k + a;
-    Convert_OX := x;
-    time2 := now;
-    time += (time2 - time1);
+    d_time := (time2 - time1);
+    time += d_time;
 end;
 
 begin
