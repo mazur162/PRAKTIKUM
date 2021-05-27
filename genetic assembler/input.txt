@@ -1,0 +1,14 @@
+population_value = 20
+max_iters = 10000
+quality_epsilon = 0.00001
+max_valueless_iters = 100
+enough_function_value = 10
+preserved_high_positions = 3
+preserved_low_positions = 2
+t_trunc = 0.4
+cross_mode = one_point
+mut_mode = one_bit
+select_mode = truncating
+variability = 0.2
+output_mode = file
+mode = test

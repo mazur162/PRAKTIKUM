@@ -1,0 +1,239 @@
+Microsoft (R) Macro Assembler Version 6.14.8444		    05/22/21 17:14:02
+module_asm.asm						     Page 1 - 1
+
+
+				.686
+				.model flat
+				
+ 00000000			    .code
+				extrn SYSTEM_$$_RANDOM$LONGINT$$LONGINT:near
+				extrn P$EVOLUTION_$$_COMPARE$WORD$POP_TYPE1$$LONGINT: near
+				extrn P$EVOLUTION_$$_SWIPE$WORD$POP_TYPE1$$LONGINT:near
+				extrn P$EVOLUTION_$$_CROSSING_EPILOGUE$POP_TYPE1$POP_TYPE2$$BYTE: near
+				extrn P$EVOLUTION_$$_MUTATION_EPILOGUE$POP_TYPE1$POP_TYPE2$$BYTE: near
+				public sort
+				public crossing
+				public mutation
+ 00000000			    .code
+				
+ 00000000			sort proc
+ 00000000  55			    push ebp
+ 00000001  8B EC		    mov ebp, esp
+ 00000003  50			    push eax
+ 00000004  53			    push ebx
+ 00000005  51			    push ecx
+ 00000006  52			    push edx
+ 00000007  57			    push edi
+ 00000008  56			    push esi
+ 00000009  8B 5D 08		    mov ebx, [ebp+8]; адрес начала массива-популяции 
+ 0000000C  0F B7 4D 0C		    movzx ecx, word ptr[ebp+12]; population_value
+ 00000010  49			    dec ecx; population_value-1
+				; пусть i это edx, a j это edi
+ 00000011  33 D2		    xor edx, edx
+ 00000013  42			    inc edx; i = 1
+				
+ 00000014			Loop_first:
+ 00000014  8B FA		    mov edi, edx; j = i
+ 00000016			Loop_second:
+ 00000016  83 FF 00		    cmp edi, 0
+ 00000019  7E 1E		    jle Continue
+ 0000001B  51			    push ecx
+ 0000001C  52			    push edx
+ 0000001D  53			    push ebx
+ 0000001E  57			    push edi
+ 0000001F  E8 00000000 E	    call P$EVOLUTION_$$_COMPARE$WORD$POP_TYPE1$$LONGINT
+ 00000024  5A			    pop edx
+ 00000025  59			    pop ecx
+ 00000026  83 F8 00		    cmp eax, 0
+ 00000029  75 0E		    jne Continue
+				
+ 0000002B  51			    push ecx
+ 0000002C  52			    push edx
+ 0000002D  53			    push ebx
+ 0000002E  57			    push edi
+ 0000002F  E8 00000000 E	    call P$EVOLUTION_$$_SWIPE$WORD$POP_TYPE1$$LONGINT
+ 00000034  5A			    pop edx
+ 00000035  59			    pop ecx
+ 00000036  4F			    dec edi
+ 00000037  EB DD		    jmp Loop_second
+				
+ 00000039			Continue:
+ 00000039  42			    inc edx
+ 0000003A  3B D1		    cmp edx, ecx
+ 0000003C  7E D6		    jle Loop_first
+ 0000003E  5E			    pop esi
+ 0000003F  5F			    pop edi
+ 00000040  5A			    pop edx
+ 00000041  59			    pop ecx
+ 00000042  5B			    pop ebx
+ 00000043  58			    pop eax
+ 00000044  5D			    pop ebp
+ 00000045  C2 0008		    ret 8
+ 00000048			sort endp
+				
+ 00000048			crossing proc
+				;word word pop_type1 pop_type2
+ 00000048  55			    push ebp
+ 00000049  8B EC		    mov ebp, esp
+ 0000004B  50			    push eax
+ 0000004C  53			    push ebx
+ 0000004D  51			    push ecx
+ 0000004E  52			    push edx
+ 0000004F  57			    push edi
+ 00000050  56			    push esi
+ 00000051  B8 0000000F		    mov eax, 15; POINT
+ 00000056  E8 00000000 E	    call SYSTEM_$$_RANDOM$LONGINT$$LONGINT
+ 0000005B  8A C8		    mov cl, al; cl = point
+ 0000005D  0F B7 7D 08		    movzx edi, word ptr[ebp+8];par1
+ 00000061  0F B7 75 0C		    movzx esi, word ptr[ebp+12]; par2 
+ 00000065  8B 5D 10		    mov ebx, [ebp+16]; offset population
+ 00000068  B8 00000004		    mov eax, 4
+ 0000006D  F7 E7		    mul edi
+ 0000006F  8B F8		    mov edi, eax
+ 00000071  B8 00000004		    mov eax, 4
+ 00000076  F7 E6		    mul esi
+ 00000078  8B F0		    mov esi, eax
+				    
+ 0000007A  8B 3C 1F		    mov edi, dword ptr[ebx+edi]; population[par1]
+ 0000007D  66| 8B 57 10		    mov dx, word ptr[edi+16];
+ 00000081  66| 8B FA		    mov di, dx
+ 00000084  66| D3 EA		    shr dx, cl;
+ 00000087  66| D3 E2		    shl dx, cl; edx = par1.gene, head1
+				    
+ 0000008A  8B 34 1E		    mov esi, dword ptr[ebx+esi]; population[par2]
+ 0000008D  66| 8B 46 10		    mov ax, word ptr[esi+16]; <eax>=<par2.gene, par2.gene>
+ 00000091  66| 8B F0		    mov si, ax
+ 00000094  66| D3 E8		    shr ax, cl
+ 00000097  66| D3 E0		    shl ax, cl; eax = par2.gene, head2
+				    
+ 0000009A  66| 2B FA		    sub di, dx; di = tail1
+ 0000009D  66| 2B F0		    sub si, ax; ax = tail2
+ 000000A0  66| 03 F8		    add di, ax; di = population[0]^.gene
+ 000000A3  66| 03 F2		    add si, dx; si = population[1]^.gene
+				    
+ 000000A6  8B 03		    mov eax, dword ptr[ebx]
+ 000000A8  66| 89 78 10		    mov [eax+16], di
+ 000000AC  8B 43 04		    mov eax, dword ptr[ebx+4]
+ 000000AF  66| 89 70 10		    mov [eax+16], si
+				    
+ 000000B3  FF 75 14		    push [ebp+20]
+ 000000B6  FF 75 10		    push [ebp+16]
+ 000000B9  E8 00000000 E	    call P$EVOLUTION_$$_CROSSING_EPILOGUE$POP_TYPE1$POP_TYPE2$$BYTE
+ 000000BE  5E			    pop esi
+ 000000BF  5F			    pop edi
+ 000000C0  5A			    pop edx
+ 000000C1  59			    pop ecx
+ 000000C2  5B			    pop ebx
+ 000000C3  58			    pop eax
+ 000000C4  5D			    pop ebp
+ 000000C5  C2 0010		    ret 16
+ 000000C8			crossing endp
+				
+ 000000C8			mutation proc
+ 000000C8  55			    push ebp
+ 000000C9  8B EC		    mov ebp, esp
+ 000000CB  50			    push eax
+ 000000CC  53			    push ebx
+ 000000CD  51			    push ecx
+ 000000CE  52			    push edx
+ 000000CF  57			    push edi
+ 000000D0  56			    push esi
+ 000000D1  B8 0000000F		    mov eax, 15; POINT
+ 000000D6  E8 00000000 E	    call SYSTEM_$$_RANDOM$LONGINT$$LONGINT
+ 000000DB  8A C8		    mov cl, al; cl = point
+				; word pop_type1 pop_type2
+ 000000DD  0F B7 7D 08		    movzx edi, word ptr[ebp+8];num1
+ 000000E1  8B 5D 0C		    mov ebx, [ebp+12]; offset population
+ 000000E4  B8 00000004		    mov eax, 4
+ 000000E9  F7 E7		    mul edi
+ 000000EB  8B F8		    mov edi, eax
+				    
+ 000000ED  8B 34 1F		    mov esi, dword ptr[ebx+edi]; population[num1]
+ 000000F0  66| 8B 56 10		    mov dx, word ptr[esi+16];
+ 000000F4  66| 8B FA		    mov di, dx
+ 000000F7  66| D3 EA		    shr dx, cl
+ 000000FA  66| D3 E2		    shl dx, cl
+ 000000FD  FE C1		    inc cl
+ 000000FF  66| D3 EF		    shr di, cl
+ 00000102  66| D3 E7		    shl di, cl
+ 00000105  FE C9		    dec cl
+ 00000107  66| 2B D7		    sub dx, di
+				
+ 0000010A  33 C0		    xor eax, eax
+ 0000010C  40			    inc eax
+ 0000010D  66| D3 E0		    shl ax, cl
+ 00000110  66| 8B 4E 10		    mov cx, word ptr[esi+16]
+				
+ 00000114  66| 83 FA 00		    cmp dx, 0
+ 00000118  74 05		    je Second_Condition
+ 0000011A  66| 2B C8		    sub cx, ax
+ 0000011D  EB 03		    jmp Continue
+ 0000011F			Second_Condition:
+ 0000011F  66| 03 C8		    add cx, ax
+ 00000122			Continue:
+ 00000122  8B 5D 0C		    mov ebx, [ebp+12]
+ 00000125  8B 03		    mov eax, dword ptr[ebx]
+ 00000127  66| 89 48 10		    mov [eax+16], cx
+ 0000012B  FF 75 10		    push [ebp+16]
+ 0000012E  FF 75 0C		    push [ebp+12]
+ 00000131  E8 00000000 E	    call P$EVOLUTION_$$_MUTATION_EPILOGUE$POP_TYPE1$POP_TYPE2$$BYTE
+ 00000136  5E			    pop esi
+ 00000137  5F			    pop edi
+ 00000138  5A			    pop edx
+ 00000139  59			    pop ecx
+ 0000013A  5B			    pop ebx
+ 0000013B  58			    pop eax
+ 0000013C  5D			    pop ebp
+ 0000013D  C2 000C		    ret 12
+ 00000140			mutation endp
+				end
+Microsoft (R) Macro Assembler Version 6.14.8444		    05/22/21 17:14:02
+module_asm.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000000 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000140 Para	  Public  'CODE'	
+
+
+Procedures,  parameters and locals:
+
+                N a m e                 Type     Value    Attr
+
+crossing . . . . . . . . . . . .	P Near	 00000048 _TEXT	Length= 00000080 Public
+mutation . . . . . . . . . . . .	P Near	 000000C8 _TEXT	Length= 00000078 Public
+  Second_Condition . . . . . . .	L Near	 0000011F _TEXT	
+  Continue . . . . . . . . . . .	L Near	 00000122 _TEXT	
+sort . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000048 Public
+  Loop_first . . . . . . . . . .	L Near	 00000014 _TEXT	
+  Loop_second  . . . . . . . . .	L Near	 00000016 _TEXT	
+  Continue . . . . . . . . . . .	L Near	 00000039 _TEXT	
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000000h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+P$EVOLUTION_$$_COMPARE$WORD$POP_TYPE1$$LONGINT . L Near	  00000000 FLAT	External
+P$EVOLUTION_$$_CROSSING_EPILOGUE$POP_TYPE1$POP_TYPE2$$BYTE . L Near   00000000 FLAT	External
+P$EVOLUTION_$$_MUTATION_EPILOGUE$POP_TYPE1$POP_TYPE2$$BYTE . L Near   00000000 FLAT	External
+P$EVOLUTION_$$_SWIPE$WORD$POP_TYPE1$$LONGINT . L Near   00000000 FLAT	External
+SYSTEM_$$_RANDOM$LONGINT$$LONGINT 	L Near	 00000000 FLAT	External
+
+	   0 Warnings
+	   0 Errors
